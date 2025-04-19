@@ -91,35 +91,34 @@
 
     /* Dark theme nav link colors and backgrounds */
     [data-theme="dark"] nav a {
-      background-color: #1e293b;
-      color: #3b82f6 !important;
+      color: var(--text-dark);
     }
 
     [data-theme="dark"] nav a:hover:not(.active) {
-      background-color: #3b82f6;
-      color: #f8fafc !important;
+      background-color: var(--primary);
+      color: white;
       transform: translateX(4px);
     }
 
     [data-theme="dark"] nav a.active {
-      background-color: #475569;
-      box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+      background-color: var(--primary);
+      color: white;
     }
 
     /* Light theme nav link colors and backgrounds */
     [data-theme="light"] nav a {
-      background-color: white;
-      color: #1a1a1a !important;
+      color: var(--text-light);
     }
 
     [data-theme="light"] nav a:hover:not(.active) {
-      background-color: #3b82f6;
-      color: #1a1a1a !important;
+      background-color: var(--primary);
+      color: white;
       transform: translateX(4px);
     }
 
     [data-theme="light"] nav a.active {
-      background-color: #e5e7eb;
+      background-color: var(--primary);
+      color: white;
     }
 
     /* Card style */
@@ -863,7 +862,7 @@
     function setTheme(theme) {
       if (theme === 'light') {
         htmlElement.setAttribute('data-theme', 'light');
-        themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364-6.364l-1.414 1.414M7.05 16.95l-1.414 1.414m12.728 0l-1.414-1.414M7.05 7.05L5.636 5.636M12 7a5 5 0 100 10 5 5 0 000-10z"/>';
+        themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
         // Set radio button to light
         themeRadios.forEach(radio => {
           radio.checked = radio.value === 'light';
