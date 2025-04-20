@@ -5,7 +5,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
-const http = require('http');
 
 // Load environment variables
 dotenv.config();
@@ -26,7 +25,6 @@ const budgetRoutes = require('./routes/budget');
 const savingsRoutes = require('./routes/savings');
 
 const app = express();
-const server = http.createServer(app);
 
 // Security middleware
 // Temporarily disable Helmet to troubleshoot blank page issue
@@ -146,64 +144,22 @@ app.use((req, res) => {
     });
 });
 
-// Connect to MongoDB and start server
-const PORT = process.env.PORT || 5000;
-
-// Initialize WebSocket server
-const { initializeWebSocketServer } = require('./wsController');
-
+// Connect to MongoDB
 connectDB()
     .then(() => {
-        server.listen(PORT, () => {
+        const PORT = process.env.PORT || 5000;
+        app.listen(PORT, () => {
             console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
             console.log(`API URL: http://localhost:${PORT}/api`);
-            console.log(`WebSocket URL: ws://localhost:${PORT}`);
-            
-            // Initialize WebSocket server after HTTP server is running
-            const wss = initializeWebSocketServer(server);
-            
-            // Store WebSocket server instance for use in routes
-            app.set('wss', wss);
-        });
-
-        // Add error handler for server listen errors
-        server.on('error', (error) => {
-            if (error.code === 'EADDRINUSE') {
-                console.error(`Port ${PORT} is already in use. Please free the port or use a different one.`);
-                process.exit(1);
-            } else {
-                console.error('Server error:', error);
-            }
         });
     })
     .catch(err => {
-        console.error('Failed to start server:', err);
+        console.error('Failed to connect to database:', err);
         process.exit(1);
     });
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-    console.error('Unhandled Promise Rejection:', err);
-    server.close(() => {
-        process.exit(1);
-    });
-});
+// WebSocket server initialization is disabled for Vercel deployment
+// as serverless functions do not support persistent WebSocket connections.
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-    console.error('Uncaught Exception:', err);
-    server.close(() => {
-        process.exit(1);
-    });
-});
-
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('SIGTERM received. Shutting down gracefully...');
-    server.close(() => {
-        console.log('Process terminated.');
-        process.exit(0);
-    });
-});
-
+// Export the Express app for Vercel serverless function
 module.exports = app;
