@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { SavingsGoal } = require('../db');
 const auth = require('../middleware/auth');
+const { broadcastEvent, broadcastToUser } = require('../websocketManager');
 
 // Get all savings goals
 router.get('/', auth, async (req, res) => {
@@ -22,6 +23,11 @@ router.post('/', auth, async (req, res) => {
             user_id: req.user._id
         });
         await goal.save();
+        
+        // Emit WebSocket event for real-time updates
+        broadcastEvent('savingsGoal:added', goal);
+        broadcastToUser(req.user._id.toString(), 'savingsGoal:added', goal);
+        
         res.status(201).json(goal);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -39,6 +45,11 @@ router.patch('/:id', auth, async (req, res) => {
         if (!goal) {
             return res.status(404).json({ error: 'Goal not found' });
         }
+        
+        // Emit WebSocket event for real-time updates
+        broadcastEvent('savingsGoal:updated', goal);
+        broadcastToUser(req.user._id.toString(), 'savingsGoal:updated', goal);
+        
         res.json(goal);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -55,6 +66,11 @@ router.delete('/:id', auth, async (req, res) => {
         if (!goal) {
             return res.status(404).json({ error: 'Goal not found' });
         }
+        
+        // Emit WebSocket event for real-time updates
+        broadcastEvent('savingsGoal:deleted', goal);
+        broadcastToUser(req.user._id.toString(), 'savingsGoal:deleted', goal);
+        
         res.json(goal);
     } catch (error) {
         res.status(500).json({ error: error.message });

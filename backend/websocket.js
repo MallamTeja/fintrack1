@@ -1,6 +1,13 @@
 const WebSocket = require('ws');
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const dotenv = require('dotenv');
+
+// Load environment variables
+dotenv.config();
+
+// Get JWT secret from config or environment variable
+const JWT_SECRET = process.env.JWT_SECRET || config.get('jwtSecret');
 
 class WebSocketServer {
     constructor(server) {
@@ -31,8 +38,8 @@ class WebSocketServer {
                 }
 
                 try {
-                    const decoded = jwt.verify(token, config.get('jwtSecret'));
-                    const userId = decoded.user.id;
+                    const decoded = jwt.verify(token, JWT_SECRET);
+                    const userId = decoded.user ? decoded.user.id : decoded.id;
 
                     // Store user ID with WebSocket connection
                     this.clients.set(ws, userId);
@@ -87,7 +94,7 @@ class WebSocketServer {
                 ws.isAlive = false;
                 ws.ping();
             });
-        }, 30000);
+        }, config.get('websocket.heartbeatInterval') || 30000);
     }
 }
 

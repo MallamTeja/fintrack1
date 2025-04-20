@@ -7,6 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js CDN for visualizations -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Import state management system and dashboard component as modules -->
+  <script type="module" src="js/state/index.js"></script>
+  <script type="module" src="js/components/dashboard.js"></script>
   <style>
     :root {
       /* Light theme */
@@ -499,82 +502,7 @@
       updateThemeIcon();
     });
 
-    // Current Balance Breakdown Chart (Doughnut)
-    const balanceCtx = document.getElementById('balanceChart').getContext('2d');
-    new Chart(balanceCtx, {
-      type: 'line',
-      data: {
-        labels: ['1', '5', '10', '15', '20', '25', '30'],
-        datasets: [{
-          label: 'Current Balance (₹)',
-          data: [10000, 12000, 15000, 18000, 22000, 27000, 32000],
-          fill: true,
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.2)',
-          tension: 0.3,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          pointBackgroundColor: '#10b981',
-          pointHoverBackgroundColor: '#059669'
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: true,
-            position: 'top'
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-          }
-        },
-        scales: {
-          x: {
-            title: {
-              display: true,
-              text: 'Date (This Month)'
-            }
-          },
-          y: {
-            beginAtZero: false,
-            title: {
-              display: true,
-              text: 'Balance (₹)'
-            }
-          }
-        },
-        interaction: {
-          mode: 'nearest',
-          axis: 'x',
-          intersect: false
-        }
-      }
-    });
-
-    // Spending by Category Chart (Bar)
-    const spendingCtx = document.getElementById('spendingChart').getContext('2d');
-    new Chart(spendingCtx, {
-      type: 'bar',
-      data: {
-        labels: ['Food', 'Travel', 'Bills', 'Other'],
-        datasets: [{
-          label: 'Amount Spent (₹)',
-          data: [2000, 1500, 3000, 1000],
-          backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false },
-        },
-        scales: {
-          y: { beginAtZero: true }
-        }
-      }
-    });
+    // Charts are now initialized and managed by the dashboard component
 
     // Helper function for category colors
     function getCategoryColor(category) {
@@ -589,14 +517,7 @@
       return colors[category] || colors.other;
     }
 
-    // Sample recent transactions data
-    const recentTransactions = [
-      { date: '2024-06-01', description: 'Grocery Shopping', category: 'food', amount: -1500 },
-      { date: '2024-06-02', description: 'Salary', category: 'income', amount: 50000 },
-      { date: '2024-06-03', description: 'Electricity Bill', category: 'bills', amount: -3000 },
-      { date: '2024-06-04', description: 'Movie Tickets', category: 'entertainment', amount: -800 },
-      { date: '2024-06-05', description: 'Freelance Project', category: 'income', amount: 12000 }
-    ];
+    // Transactions are now managed by the state management system
 
     // Function to render recent transactions in the table
     function renderRecentTransactions() {
@@ -702,12 +623,10 @@
             </div>
             
             <div class="flex justify-end space-x-3 mt-6">
-              <button type="button" id="cancelTransaction" 
-                      class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <button type="button" id="cancelTransaction" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-white rounded-md hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors">
                 Cancel
               </button>
-              <button type="submit" 
-                      class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
                 Save Transaction
               </button>
             </div>
@@ -717,11 +636,12 @@
       
       document.body.appendChild(modal);
       
-      // Handle close modal
+      // Close modal when clicking the close button
       document.getElementById('closeModal').addEventListener('click', () => {
         document.body.removeChild(modal);
       });
       
+      // Close modal when clicking the cancel button
       document.getElementById('cancelTransaction').addEventListener('click', () => {
         document.body.removeChild(modal);
       });
@@ -730,28 +650,24 @@
       document.getElementById('quickTransactionForm').addEventListener('submit', (e) => {
         e.preventDefault();
         
-        const formData = {
-          description: document.getElementById('description').value,
-          amount: parseFloat(document.getElementById('amount').value),
-          date: document.getElementById('date').value,
-          type: document.getElementById('type').value,
-          category: category
+        const description = document.getElementById('description').value;
+        const amount = parseFloat(document.getElementById('amount').value);
+        const date = document.getElementById('date').value;
+        const type = document.getElementById('type').value;
+        
+        // Create transaction object
+        const transaction = {
+          description,
+          amount: type === 'expense' ? -amount : amount,
+          date,
+          category,
+          type
         };
         
-        // Adjust amount based on type
-        if (formData.type === 'expense') {
-          formData.amount = -Math.abs(formData.amount);
-        } else {
-          formData.amount = Math.abs(formData.amount);
-        }
+        // Add transaction to state manager
+        window.FinTrackState.store.dispatch('transaction:add', transaction);
         
-        // In a real app, you would save this to your backend
-        console.log('Saving transaction:', formData);
-        
-        // Update UI with new transaction
-        updateDashboardWithNewTransaction(formData);
-        
-        // Show success message
+        // Show success notification
         showNotification('success', 'Transaction added successfully!');
         
         // Close modal
@@ -759,57 +675,7 @@
       });
     }
     
-    // Function to update dashboard with new transaction
-    function updateDashboardWithNewTransaction(transaction) {
-      // Update category amounts
-      const categoryAmountElements = {
-        food: document.getElementById('foodAmount'),
-        travel: document.getElementById('travelAmount'),
-        bills: document.getElementById('billsAmount'),
-        shopping: document.getElementById('shoppingAmount'),
-        salary: document.getElementById('salaryAmount')
-      };
-      
-      if (categoryAmountElements[transaction.category]) {
-        const element = categoryAmountElements[transaction.category];
-        const currentAmount = parseFloat(element.textContent.replace('₹', '').replace(',', ''));
-        const newAmount = currentAmount + transaction.amount;
-        element.textContent = '₹' + newAmount.toLocaleString();
-      }
-      
-      // Update main dashboard cards
-      if (transaction.amount > 0) {
-        // Update income card
-        const incomeElement = document.querySelector('.card.income p.text-2xl');
-        if (incomeElement) {
-          const currentIncome = parseFloat(incomeElement.textContent.replace('₹', '').replace(',', ''));
-          incomeElement.textContent = '₹' + (currentIncome + transaction.amount).toLocaleString();
-        }
-      } else {
-        // Update expenses card
-        const expensesElement = document.querySelector('.card:not(.income) p.text-2xl');
-        if (expensesElement) {
-          const currentExpenses = parseFloat(expensesElement.textContent.replace('₹', '').replace(',', ''));
-          expensesElement.textContent = '₹' + (currentExpenses + Math.abs(transaction.amount)).toLocaleString();
-        }
-      }
-      
-      // Add to recent transactions array
-      recentTransactions.unshift({
-        date: transaction.date,
-        description: transaction.description,
-        category: transaction.category,
-        amount: transaction.amount
-      });
-      
-      // Limit to 5 recent transactions
-      if (recentTransactions.length > 5) {
-        recentTransactions.pop();
-      }
-      
-      // Re-render transactions table if it exists
-      renderRecentTransactions();
-    }
+    // Dashboard updates are now handled by the dashboard component
     
     // Function to show notification
     function showNotification(type, message) {
@@ -826,6 +692,36 @@
         setTimeout(() => notificationDiv.remove(), 500);
       }, 3000);
     }
+  </script>
+  <!-- WebSocket Connection Status -->  
+  <div id="connection-status" class="fixed bottom-4 right-4 z-50"></div>
+
+  <!-- Real-Time Testing Scripts -->
+  <script type="module" src="js/utils/realTimeTest.js"></script>
+  <script type="module" src="js/utils/transactionDebugger.js"></script>
+  <script type="module" src="js/utils/testReportGenerator.js"></script>
+  <script type="module">
+    import ConnectionStatusComponent from './js/components/connectionStatus.js';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      // Initialize connection status component
+      new ConnectionStatusComponent('connection-status');
+      
+      // Log testing instructions
+      console.log('FinTrack Real-Time Testing Tools Available:');
+      console.log('1. Test API: realTimeTest.testAPI()');
+      console.log('2. Test WebSocket: realTimeTest.testWebSocket()');
+      console.log('3. Test Store: realTimeTest.testStore()');
+      console.log('4. Test UI: realTimeTest.testUI()');
+      console.log('5. Test Full Flow: realTimeTest.testFullFlow()');
+      console.log('6. Test Multi-Tab: realTimeTest.testMultiTab()');
+      console.log('7. Debug Transactions: transactionDebugger.testAddTransaction()');
+      console.log('\nTest Report Generator:');
+      console.log('1. Run All Tests: testReport.runAllTests()');
+      console.log('2. Generate Report: testReport.generateReport()');
+      console.log('3. Display Report: testReport.displayReport()');
+      console.log('4. Export Report: testReport.exportReport()');
+    });
   </script>
 </body>
 </html>

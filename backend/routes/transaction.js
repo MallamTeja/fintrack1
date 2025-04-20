@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
+const { broadcastEvent, broadcastToUser } = require('../websocketManager');
 
 // Get all transactions for a user
 router.get('/', auth, async (req, res) => {
@@ -51,6 +52,10 @@ router.post('/', auth, async (req, res) => {
         }
         await req.user.save();
 
+        // Emit WebSocket event for real-time updates
+        broadcastEvent('transaction:added', transaction);
+        broadcastToUser(req.user._id.toString(), 'transaction:added', transaction);
+
         res.status(201).json(transaction);
     } catch (error) {
         console.error('Error adding transaction:', error);
@@ -80,6 +85,11 @@ router.patch('/:id', async (req, res) => {
 
         updates.forEach(update => transaction[update] = req.body[update]);
         await transaction.save();
+        
+        // Emit WebSocket event for real-time updates
+        broadcastEvent('transaction:updated', transaction);
+        broadcastToUser(req.user._id.toString(), 'transaction:updated', transaction);
+        
         res.json(transaction);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -97,6 +107,10 @@ router.delete('/:id', async (req, res) => {
         if (!transaction) {
             return res.status(404).json({ error: 'Transaction not found' });
         }
+
+        // Emit WebSocket event for real-time updates
+        broadcastEvent('transaction:deleted', transaction);
+        broadcastToUser(req.user._id.toString(), 'transaction:deleted', transaction);
 
         res.json(transaction);
     } catch (error) {

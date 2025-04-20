@@ -149,14 +149,18 @@ app.use((req, res) => {
 // Connect to MongoDB and start server
 const PORT = process.env.PORT || 5000;
 
+// Initialize WebSocket server
+const { initializeWebSocketServer } = require('./websocketManager');
+
 connectDB()
     .then(() => {
         server.listen(PORT, () => {
             console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
             console.log(`API URL: http://localhost:${PORT}/api`);
+            
+            // Initialize WebSocket server after HTTP server is running
+            initializeWebSocketServer(server);
         });
-
-
     })
     .catch(err => {
         console.error('Failed to start server:', err);

@@ -1,8 +1,25 @@
 // TransactionService to manage transactions state across pages
 class TransactionService {
     constructor() {
-        this.transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+        this.transactions = [];
         this.subscribers = [];
+        this.apiUrl = '/api/transactions'; // Adjust if your API endpoint is different
+        this.token = localStorage.getItem('token');
+        
+        // Load initial data
+        this.fetchTransactions();
+        
+        // Set up WebSocket connection for real-time updates if available
+        this.setupWebSocketConnection();
+    }
+    
+    // Set up WebSocket connection if the service is available
+    setupWebSocketConnection() {
+        if (window.websocketService) {
+            window.websocketService.subscribe('transaction_update', () => {
+                this.fetchTransactions();
+            });
+        }
     }
 
     // Subscribe to transaction updates
@@ -13,37 +30,144 @@ class TransactionService {
 
     // Notify all subscribers of changes
     notifySubscribers() {
-        localStorage.setItem('transactions', JSON.stringify(this.transactions));
         this.subscribers.forEach(callback => callback(this.transactions));
+    }
+    
+    // Fetch transactions from the API
+    async fetchTransactions() {
+        try {
+            const response = await fetch(this.apiUrl, {
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch transactions');
+            }
+            
+            this.transactions = await response.json();
+            this.notifySubscribers();
+        } catch (error) {
+            console.error('Error fetching transactions:', error);
+            // Fallback to localStorage if API fails
+            this.transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            this.notifySubscribers();
+        }
     }
 
     // Add new transaction
-    addTransaction(transaction) {
-        this.transactions.unshift({
-            id: Date.now(), // Use timestamp as unique ID
-            ...transaction,
-            date: transaction.date || new Date().toISOString().split('T')[0]
-        });
-        this.notifySubscribers();
+    async addTransaction(transaction) {
+        try {
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    ...transaction,
+                    date: transaction.date || new Date().toISOString().split('T')[0]
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to add transaction');
+            }
+            
+            const newTransaction = await response.json();
+            this.transactions.unshift(newTransaction);
+            this.notifySubscribers();
+            
+            // Backup to localStorage
+            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+            
+            return newTransaction;
+        } catch (error) {
+            console.error('Error adding transaction:', error);
+            
+            // Fallback to local storage if API fails
+            const fallbackTransaction = {
+                id: Date.now(),
+                ...transaction,
+                date: transaction.date || new Date().toISOString().split('T')[0]
+            };
+            
+            this.transactions.unshift(fallbackTransaction);
+            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+            this.notifySubscribers();
+            
+            return fallbackTransaction;
+        }
     }
 
     // Delete transaction
-    deleteTransaction(id) {
-        this.transactions = this.transactions.filter(t => t.id !== id);
-        this.notifySubscribers();
+    async deleteTransaction(id) {
+        try {
+            const response = await fetch(`${this.apiUrl}/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to delete transaction');
+            }
+            
+            this.transactions = this.transactions.filter(t => t._id !== id && t.id !== id);
+            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+            this.notifySubscribers();
+        } catch (error) {
+            console.error('Error deleting transaction:', error);
+            
+            // Fallback to local operation if API fails
+            this.transactions = this.transactions.filter(t => t._id !== id && t.id !== id);
+            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+            this.notifySubscribers();
+        }
     }
 
     // Edit transaction
-    editTransaction(id, updatedTransaction) {
-        this.transactions = this.transactions.map(t => 
-            t.id === id ? { ...t, ...updatedTransaction } : t
-        );
-        this.notifySubscribers();
+    async editTransaction(id, updatedTransaction) {
+        try {
+            const response = await fetch(`${this.apiUrl}/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${this.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedTransaction)
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to update transaction');
+            }
+            
+            const updated = await response.json();
+            this.transactions = this.transactions.map(t => 
+                (t._id === id || t.id === id) ? { ...t, ...updated } : t
+            );
+            
+            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+            this.notifySubscribers();
+        } catch (error) {
+            console.error('Error updating transaction:', error);
+            
+            // Fallback to local operation if API fails
+            this.transactions = this.transactions.map(t => 
+                (t._id === id || t.id === id) ? { ...t, ...updatedTransaction } : t
+            );
+            localStorage.setItem('transactions', JSON.stringify(this.transactions));
+            this.notifySubscribers();
+        }
     }
 
     // Get transaction by ID
     getTransaction(id) {
-        return this.transactions.find(t => t.id === id);
+        return this.transactions.find(t => t._id === id || t.id === id);
     }
 
     // Get all transactions
@@ -53,15 +177,19 @@ class TransactionService {
 
     // Calculate total balance
     getTotalBalance() {
-        return this.transactions.reduce((sum, t) => sum + t.amount, 0);
+        return this.transactions.reduce((sum, t) => {
+            const amount = parseFloat(t.amount);
+            return t.type === 'income' ? sum + amount : sum - amount;
+        }, 0);
     }
 
     // Get spending by category
     getSpendingByCategory() {
         return this.transactions
-            .filter(t => t.amount < 0)
+            .filter(t => t.type === 'expense')
             .reduce((acc, t) => {
-                acc[t.category] = (acc[t.category] || 0) + Math.abs(t.amount);
+                const amount = parseFloat(t.amount);
+                acc[t.category] = (acc[t.category] || 0) + amount;
                 return acc;
             }, {});
     }

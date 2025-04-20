@@ -3,6 +3,7 @@ const router = express.Router();
 const Budget = require('../models/Budget');
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
+const { broadcastEvent, broadcastToUser } = require('../websocketManager');
 
 // Get all budgets for a user
 router.get('/', auth, async (req, res) => {
@@ -67,6 +68,11 @@ router.post('/', auth, async (req, res) => {
         });
 
         await budget.save();
+        
+        // Emit WebSocket event for real-time updates
+        broadcastEvent('budget:added', budget);
+        broadcastToUser(req.user._id.toString(), 'budget:added', budget);
+        
         res.status(201).json(budget);
     } catch (error) {
         console.error('Error creating budget:', error);
@@ -93,6 +99,10 @@ router.patch('/:id', auth, async (req, res) => {
             return res.status(404).json({ error: 'Budget not found' });
         }
 
+        // Emit WebSocket event for real-time updates
+        broadcastEvent('budget:updated', budget);
+        broadcastToUser(req.user._id.toString(), 'budget:updated', budget);
+
         res.json(budget);
     } catch (error) {
         console.error('Error updating budget:', error);
@@ -111,6 +121,10 @@ router.delete('/:id', auth, async (req, res) => {
         if (!budget) {
             return res.status(404).json({ error: 'Budget not found' });
         }
+
+        // Emit WebSocket event for real-time updates
+        broadcastEvent('budget:deleted', budget);
+        broadcastToUser(req.user._id.toString(), 'budget:deleted', budget);
 
         res.json({ message: 'Budget deleted successfully' });
     } catch (error) {
