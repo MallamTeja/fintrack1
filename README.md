@@ -45,6 +45,38 @@ node server.js
 
 5. Open your browser and navigate to `http://localhost:5000`
 
+## Deployment on Vercel
+
+This project can be deployed on Vercel with the following setup:
+
+- The backend API is deployed as serverless functions from `backend/server.js`.
+- The frontend is served as static files from the `frontend/public` directory.
+- The `vercel.json` file configures the builds and routes for Vercel.
+
+### Steps to deploy:
+
+1. Set the following environment variables in your Vercel dashboard for the project:
+   - `MONGODB_URI`: Your MongoDB connection string.
+   - `FRONTEND_URL`: The URL of your deployed frontend (e.g., `https://your-project.vercel.app`).
+   - `NODE_ENV`: Set to `production`.
+   - `JWT_SECRET`: Your JWT secret key.
+
+2. Deploy the project using either:
+   - Vercel CLI:
+     ```bash
+     vercel
+     ```
+   - Git integration: Push your code to a Git repository connected to Vercel.
+
+3. Vercel will build and deploy the backend as serverless functions and serve the frontend as static files.
+
+4. After deployment, your API will be accessible under `/api` routes, and the frontend will be served at the root URL.
+
+### Notes:
+
+- The backend server is configured to work as a serverless function and does not listen on a specific port.
+- WebSocket support may require additional configuration as serverless functions have limitations.
+
 ## Project Structure
 
 ```
