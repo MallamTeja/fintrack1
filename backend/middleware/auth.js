@@ -27,13 +27,13 @@ const authMiddleware = async function(req, res, next) {
         
         // Find user by id
         const user = await User.findById(decoded.userId);
-
         if (!user) {
-            return res.status(401).json({ error: 'User not found' });
+            return res.status(401).json({ error: 'Invalid token. User not found' });
         }
         
         // Add user info to request
         req.user = user;
+        console.log('Auth middleware: User authenticated with ID:', user._id);
         next();
     } catch (error) {
         if (error.name === 'TokenExpiredError') {

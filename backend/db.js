@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
+const config = require('./config/default.json');
 
 const connectDB = async () => {
     try {
-        const mongoURI = process.env.MONGODB_URI;
+        const mongoURI = process.env.MONGODB_URI || config.mongoURI;
         console.log('MongoDB URI:', mongoURI);
 
         if (!mongoURI) {
-            throw new Error('MongoDB URI is not defined in environment variables');
+            throw new Error('MongoDB URI is not defined in environment variables or config file');
         }
 
         await mongoose.connect(mongoURI, {
@@ -19,6 +20,8 @@ const connectDB = async () => {
         });
 
         console.log('MongoDB Connected Successfully');
+        console.log('Connected to database:', mongoose.connection.name);
+        console.log('Collections:', Object.keys(mongoose.connection.collections));
 
         // Handle connection events
         mongoose.connection.on('error', (err) => {

@@ -594,6 +594,10 @@ export class ChartManager {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return null;
     
+    // Destroy existing chart if it exists
+    this.destroyChart(canvasId);
+    
+    // Create new chart
     const chart = ChartFactory.createLineChart(canvas, options);
     this.charts.set(canvasId, chart);
     
@@ -613,6 +617,10 @@ export class ChartManager {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return null;
     
+    // Destroy existing chart if it exists
+    this.destroyChart(canvasId);
+    
+    // Create new chart
     const chart = ChartFactory.createBarChart(canvas, options);
     this.charts.set(canvasId, chart);
     
@@ -632,6 +640,10 @@ export class ChartManager {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return null;
     
+    // Destroy existing chart if it exists
+    this.destroyChart(canvasId);
+    
+    // Create new chart
     const chart = ChartFactory.createDoughnutChart(canvas, options);
     this.charts.set(canvasId, chart);
     
@@ -685,11 +697,45 @@ export class ChartManager {
   }
   
   /**
+   * Destroy a specific chart by ID
+   * @param {string} chartId - Chart ID
+   */
+  destroyChart(chartId) {
+    // Get the chart instance
+    const chart = this.charts.get(chartId);
+    if (chart) {
+      // Destroy the chart
+      chart.destroy();
+      this.charts.delete(chartId);
+    }
+    
+    // Get the updater instance
+    const updater = this.updaters.get(chartId);
+    if (updater) {
+      // Destroy the updater
+      updater.destroy();
+      this.updaters.delete(chartId);
+    }
+  }
+  
+  /**
    * Clean up all charts
    */
   destroyAll() {
-    this.updaters.forEach(updater => updater.destroy());
+    this.charts.forEach(chart => {
+      if (chart) {
+        chart.destroy();
+      }
+    });
+    
     this.charts.clear();
+    
+    this.updaters.forEach(updater => {
+      if (updater) {
+        updater.destroy();
+      }
+    });
+    
     this.updaters.clear();
   }
 }

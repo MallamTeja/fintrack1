@@ -23,7 +23,7 @@ class WebSocketService {
     
     // WebSocket connection
     this.socket = null;
-    this.url = 'ws://localhost:3000';
+    this.url = 'ws://localhost:5000';
     this.status = 'disconnected'; // 'connected', 'connecting', 'disconnected', 'error'
     
     // Authentication
@@ -62,9 +62,20 @@ class WebSocketService {
     this.token = token;
     this.log('Token set');
     
+    // Store token in memory for reconnection
+    if (token) {
+      // Don't store in localStorage here - that should be handled by auth service
+      this.log('Token stored for WebSocket authentication');
+    }
+    
     // If already connected, disconnect and reconnect with new token
     if (this.isConnected()) {
+      this.log('Reconnecting with new token...');
       this.disconnect();
+      this.connect();
+    } else {
+      // If not connected, try to connect with the new token
+      this.log('Connecting with new token...');
       this.connect();
     }
   }
@@ -121,17 +132,39 @@ class WebSocketService {
         return;
       }
       
+      // Update status and notify subscribers
       this.status = 'connecting';
       this.log(`Connecting to ${this.url}`);
+      store.dispatch('websocket:statusChanged', { status: 'connecting' });
       
       try {
         // Create WebSocket connection
         this.socket = new WebSocket(this.url);
         
+        // Set a connection timeout
+        const connectionTimeout = setTimeout(() => {
+          if (this.status === 'connecting') {
+            this.log('Connection timeout');
+            this.status = 'error';
+            store.dispatch('websocket:statusChanged', { 
+              status: 'error', 
+              error: 'Connection timeout' 
+            });
+            reject(new Error('Connection timeout'));
+            
+            // Try to reconnect
+            this.attemptReconnect();
+          }
+        }, 5000); // 5 second timeout
+        
         // Connection opened
         this.socket.onopen = () => {
+          // Clear connection timeout
+          clearTimeout(connectionTimeout);
+          
           this.status = 'connected';
           this.log('Connected');
+          store.dispatch('websocket:statusChanged', { status: 'connected' });
           
           // Reset reconnection settings
           this.reconnectAttempts = 0;
@@ -145,7 +178,17 @@ class WebSocketService {
           
           // Authenticate if token is available
           if (this.token) {
+            this.log('Token available, authenticating...');
             this.authenticate();
+          } else {
+            this.log('No token available, skipping authentication');
+            // Try to get token from localStorage
+            const storedToken = localStorage.getItem('token');
+            if (storedToken) {
+              this.log('Found token in localStorage, authenticating...');
+              this.token = storedToken;
+              this.authenticate();
+            }
           }
           
           // Start heartbeat
@@ -320,8 +363,54 @@ class WebSocketService {
    */
   authenticate() {
     if (this.isConnected() && this.token) {
-      this.emit('authenticate', { token: this.token });
-      this.log('Authentication request sent');
+      this.log('Sending authentication request with token');
+      
+      try {
+        // Format the authentication message
+        const authMessage = {
+          type: 'authenticate',
+          token: this.token,
+          payload: {}
+        };
+        
+        // Send the authentication message
+        this.socket.send(JSON.stringify(authMessage));
+        
+        this.log('Authentication request sent');
+        
+        // Set a timeout for authentication response
+        if (this.authTimeout) {
+          clearTimeout(this.authTimeout);
+        }
+        
+        this.authTimeout = setTimeout(() => {
+          if (this.status !== 'authenticated') {
+            this.log('Authentication timeout');
+            this.status = 'error';
+            store.dispatch('websocket:statusChanged', { 
+              status: 'error', 
+              error: 'Authentication timeout' 
+            });
+            
+            // Try to reconnect
+            this.disconnect();
+            this.connect();
+          }
+        }, 5000); // 5 second timeout
+      } catch (error) {
+        this.log('Error sending authentication request: ' + error.message);
+        this.status = 'error';
+        store.dispatch('websocket:statusChanged', { 
+          status: 'error', 
+          error: 'Authentication error: ' + error.message 
+        });
+      }
+    } else {
+      if (!this.isConnected()) {
+        this.log('Cannot authenticate: Not connected');
+      } else if (!this.token) {
+        this.log('Cannot authenticate: No token available');
+      }
     }
   }
   
@@ -330,26 +419,45 @@ class WebSocketService {
    * @param {Object} message - Message object
    */
   handleMessage(message) {
-    const { event, data } = message;
+    const { type, payload } = message;
     
-    this.log(`Received message: ${event}`, data);
+    this.log(`Received message: ${type}`, payload);
     
     // Handle heartbeat response
-    if (event === 'heartbeat') {
+    if (type === 'pong') {
       this.missedHeartbeats = 0;
       return;
     }
     
+    // Handle welcome message
+    if (type === 'welcome') {
+      this.log('Connected to WebSocket server');
+      return;
+    }
+    
     // Handle authentication response
-    if (event === 'authenticated') {
-      this.log('Authentication successful');
+    if (type === 'authenticated') {
+      this.log('Authentication successful', payload);
+      // Update connection status
+      this.status = 'authenticated';
+      store.dispatch('websocket:statusChanged', { status: 'authenticated' });
       return;
     }
     
     // Handle authentication error
-    if (event === 'authentication_error') {
-      this.log('Authentication failed', data);
+    if (type === 'unauthorized') {
+      this.log('Authentication failed', payload);
+      this.status = 'error';
+      store.dispatch('websocket:statusChanged', { status: 'error', error: payload });
       return;
+    }
+    
+    // Handle transaction events
+    if (type === 'transaction:added' || 
+        type === 'transaction:updated' || 
+        type === 'transaction:deleted') {
+      // Dispatch to store
+      store.dispatch(type, payload);
     }
     
     // Notify event handlers
@@ -503,28 +611,33 @@ class WebSocketService {
   }
   
   /**
-   * Send event to WebSocket server
-   * @param {string} event - Event name
-   * @param {*} data - Event data
-   * @returns {boolean} Whether message was sent
+   * Emit event to server
+   * @param {string} type - Message type
+   * @param {*} payload - Message payload
+   * @returns {boolean} Whether message was sent successfully
    */
-  emit(event, data) {
-    const message = { event, data };
+  emit(type, payload) {
+    if (!this.isConnected()) {
+      this.log(`Cannot emit ${type}: not connected`);
+      this.queueMessage({ type, payload });
+      return false;
+    }
     
-    this.log(`Emitting event: ${event}`, data);
+    this.log(`Emitting ${type}`);
     
-    if (this.isConnected()) {
-      try {
-        this.socket.send(JSON.stringify(message));
-        return true;
-      } catch (error) {
-        this.log(`Error sending message: ${event}`, error);
-        this.queueMessage(message);
-        return false;
-      }
-    } else {
-      this.log(`Socket not connected, queueing message: ${event}`);
-      this.queueMessage(message);
+    // Format message according to backend expectations
+    const message = {
+      type,
+      token: this.token,
+      payload: payload || {}
+    };
+    
+    try {
+      this.socket.send(JSON.stringify(message));
+      return true;
+    } catch (error) {
+      this.log(`Error sending message: ${type}`, error);
+      this.queueMessage({ type, payload });
       return false;
     }
   }

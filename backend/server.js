@@ -150,16 +150,30 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 5000;
 
 // Initialize WebSocket server
-const { initializeWebSocketServer } = require('./websocketManager');
+const { initializeWebSocketServer } = require('./wsController');
 
 connectDB()
     .then(() => {
         server.listen(PORT, () => {
             console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
             console.log(`API URL: http://localhost:${PORT}/api`);
+            console.log(`WebSocket URL: ws://localhost:${PORT}`);
             
             // Initialize WebSocket server after HTTP server is running
-            initializeWebSocketServer(server);
+            const wss = initializeWebSocketServer(server);
+            
+            // Store WebSocket server instance for use in routes
+            app.set('wss', wss);
+        });
+
+        // Add error handler for server listen errors
+        server.on('error', (error) => {
+            if (error.code === 'EADDRINUSE') {
+                console.error(`Port ${PORT} is already in use. Please free the port or use a different one.`);
+                process.exit(1);
+            } else {
+                console.error('Server error:', error);
+            }
         });
     })
     .catch(err => {

@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -23,10 +22,6 @@ router.post('/register', async (req, res) => {
             email,
             password
         });
-
-        // Hash password
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(password, salt);
 
         // Save user to database
         await user.save();
@@ -66,8 +61,8 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ msg: 'Invalid credentials' });
         }
 
-        // Verify password
-        const isMatch = await bcrypt.compare(password, user.password);
+        // Verify password (plain string comparison)
+        const isMatch = password === user.password;
         if (!isMatch) {
             return res.status(400).json({ msg: 'Invalid credentials' });
         }

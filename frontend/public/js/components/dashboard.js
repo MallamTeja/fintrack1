@@ -92,7 +92,12 @@ class DashboardComponent {
    * @param {Array} savingsGoals - Updated savings goals
    */
   handleSavingsGoalsUpdated(savingsGoals) {
-    this.state.savingsGoals = savingsGoals;
+    // Defensive check for undefined or null savingsGoals
+    if (!Array.isArray(savingsGoals)) {
+      this.state.savingsGoals = [];
+    } else {
+      this.state.savingsGoals = savingsGoals;
+    }
     this.renderDashboard();
   }
   
@@ -237,11 +242,17 @@ class DashboardComponent {
    */
   renderDashboard() {
     const transactions = this.state.transactions;
+    const savingsGoals = this.state.savingsGoals;
     
     if (transactions.length === 0) {
       // If no transactions, show empty state
       this.renderEmptyState();
       return;
+    }
+    
+    // Defensive check for savingsGoals before usage
+    if (!Array.isArray(savingsGoals)) {
+      this.state.savingsGoals = [];
     }
     
     // Calculate financial stats

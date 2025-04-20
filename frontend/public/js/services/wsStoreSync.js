@@ -169,7 +169,8 @@ class WSStoreSyncService {
       case 'budget':
         return store.getState().budgets.find(b => b._id === id);
       case 'savingsGoal':
-        return store.getState().savingsGoals.find(g => g._id === id);
+        const savingsGoals = store.getState().savingsGoals;
+        return savingsGoals && Array.isArray(savingsGoals) ? savingsGoals.find(g => g._id === id) : null;
       default:
         return null;
     }

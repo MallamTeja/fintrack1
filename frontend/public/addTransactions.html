@@ -7,6 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Chart.js CDN for visualizations -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="js/state/index.js"></script>
+  <script src="js/transactionService.js"></script>
   <style>
     :root {
       /* Light theme */
@@ -109,7 +111,6 @@
       padding: 0.75rem 1rem;
       border-radius: 0.5rem;
       transition: all 0.3s ease;
-      margin: 0.25rem 0;
       font-weight: 500;
       display: flex;
       align-items: center;
@@ -118,14 +119,55 @@
     }
 
     nav a.active {
-      background-color: var(--primary);
-      color: white;
+      background-color: var(--primary-hover);
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
     }
-
+    
+    nav a.active::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      height: 60%;
+      width: 4px;
+      background: rgb(238, 234, 234);
+      border-radius: 2px;
+    }
+    
     nav a:hover:not(.active) {
+      background-color: var(--primary-hover);
+      transform: translateX(4px);
+    }
+    
+    /* Dark theme nav link colors and backgrounds */
+    [data-theme="dark"] nav a {
+      color: var(--text-dark);
+    }
+    
+    [data-theme="dark"] nav a:hover:not(.active) {
       background-color: var(--primary);
       color: white;
       transform: translateX(4px);
+    }
+    
+    [data-theme="dark"] nav a.active {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    /* Light theme nav link colors and backgrounds */
+    [data-theme="light"] nav a {
+      color: var(--text-light);
+    }
+    
+    [data-theme="light"] nav a:hover:not(.active) {
+      background-color: var(--primary);
+      color: white;
+      transform: translateX(4px);
+    }
+    
+    [data-theme="light"] nav a.active {
+      background-color: var(--primary);
+      color: white;
     }
 
     @media (max-width: 768px) {
@@ -220,7 +262,7 @@
       </a>
       <a href="insights.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Insights">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5"/>
         </svg>
         Insights
       </a>
@@ -503,7 +545,7 @@
     });
 
     // Form submission handler
-    transactionForm.addEventListener('submit', (e) => {
+    transactionForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
       // Validate amount positive
@@ -561,104 +603,14 @@
     // Initialize theme icon
     updateThemeIcon();
 
-    // Current Balance Breakdown Chart (Doughnut)
-    const balanceCtx = document.getElementById('balanceChart').getContext('2d');
-    new Chart(balanceCtx, {
-      type: 'line',
-      data: {
-        labels: ['1', '5', '10', '15', '20', '25', '30'],
-        datasets: [{
-          label: 'Current Balance (₹)',
-          data: [10000, 12000, 15000, 18000, 22000, 27000, 32000],
-          fill: true,
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.2)',
-          tension: 0.3,
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          pointBackgroundColor: '#10b981',
-          pointHoverBackgroundColor: '#059669'
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: {
-            display: true,
-            position: 'top'
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-          }
-        },
-        scales: {
-          x: {
-            title: {
-              display: true,
-              text: 'Date (This Month)'
-            }
-          },
-          y: {
-            beginAtZero: false,
-            title: {
-              display: true,
-              text: 'Balance (₹)'
-            }
-          }
-        },
-        interaction: {
-          mode: 'nearest',
-          axis: 'x',
-          intersect: false
-        }
-      }
+    // Transactions array populated via service
+    let recentTransactions = [];
+
+    // Subscribe to real-time transaction updates
+    transactionService.subscribe(transactions => {
+      recentTransactions = transactions;
+      renderRecentTransactions();
     });
-
-    // Spending by Category Chart (Bar)
-    const spendingCtx = document.getElementById('spendingChart').getContext('2d');
-    new Chart(spendingCtx, {
-      type: 'bar',
-      data: {
-        labels: ['Food', 'Travel', 'Bills', 'Other'],
-        datasets: [{
-          label: 'Amount Spent (₹)',
-          data: [2000, 1500, 3000, 1000],
-          backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          legend: { display: false },
-        },
-        scales: {
-          y: { beginAtZero: true }
-        }
-      }
-    });
-
-    // Helper function for category colors
-    function getCategoryColor(category) {
-      const colors = {
-        electronics: 'bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-100',
-        travel: 'bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100',
-        health: 'bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-100',
-        education: 'bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100',
-        home: 'bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-100',
-        other: 'bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-100'
-      };
-      return colors[category] || colors.other;
-    }
-
-    // Sample recent transactions data
-    const recentTransactions = [
-      { date: '2024-06-01', description: 'Grocery Shopping', category: 'food', amount: -1500 },
-      { date: '2024-06-02', description: 'Salary', category: 'income', amount: 50000 },
-      { date: '2024-06-03', description: 'Electricity Bill', category: 'bills', amount: -3000 },
-      { date: '2024-06-04', description: 'Movie Tickets', category: 'entertainment', amount: -800 },
-      { date: '2024-06-05', description: 'Freelance Project', category: 'income', amount: 12000 }
-    ];
 
     // Function to render recent transactions in the table
     function renderRecentTransactions() {
@@ -693,11 +645,27 @@
       });
     }
 
-    // Render recent transactions on page load
-    renderRecentTransactions();
-
     // Initialize theme icon
     updateThemeIcon();
+
+    // Handle add-transaction form submissions
+    transactionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const type = document.querySelector('input[name="transactionType"]:checked').value;
+      const amount = parseFloat(amountInput.value);
+      let category = categorySelect.value;
+      if (category === 'Other') category = customCategoryInput.value;
+      const date = document.getElementById('date').value;
+      const description = document.getElementById('description').value;
+      try {
+        await transactionService.addTransaction({ type, amount, category, date, description });
+        transactionForm.reset();
+        clearQuickAmountSelection();
+        loadCategories(type);
+      } catch (error) {
+        console.error('Add transaction error:', error);
+      }
+    });
   </script>
 </body>
 </html>

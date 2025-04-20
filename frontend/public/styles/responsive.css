@@ -1,0 +1,84 @@
+/* Responsive styles for FinTrack */
+
+/* Base layout adjustments */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* Container adjustments */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Cards layout */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.card {
+  flex: 1 1 300px;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+}
+
+/* Transaction list */
+.transaction-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Responsive typography */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0.5rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .cards {
+    flex-direction: column;
+  }
+  
+  .card {
+    flex: 1 1 100%;
+  }
+  
+  .transaction-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .transaction-amount, .transaction-actions {
+    margin-top: 0.5rem;
+  }
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 480px) {
+  .card p.text-2xl {
+    font-size: 1.25rem;
+  }
+  
+  .transaction-info {
+    font-size: 0.9rem;
+  }
+  
+  .btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+}

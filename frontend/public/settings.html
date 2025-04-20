@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>FinTrack - Settings</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Authentication check script -->
+  <script type="module" src="js/auth/authCheck.js"></script>
   <style>
     /* Reuse theme variables and styles from SavingGoals.html */
     :root {
@@ -945,6 +947,25 @@
       }
     });
 
+    // Add logout functionality
+    const logoutButton = document.getElementById('logoutButton');
+    logoutButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      console.log('Logout clicked');
+      
+      // Remove token from localStorage
+      localStorage.removeItem('token');
+      
+      // Reset state via store if available
+      if (window.FinTrackState && window.FinTrackState.store) {
+        window.FinTrackState.store.dispatch('user:logout');
+      }
+      
+      // Redirect to login page
+      window.location.href = '/login.html';
+    });
+
   </script>
+  <script type="module" src="js/auth/logoutHandler.js"></script>
 </body>
 </html>

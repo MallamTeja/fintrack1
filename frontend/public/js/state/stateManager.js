@@ -747,21 +747,38 @@ class StateManager {
     }
   }
   
+  /**
+   * Log out the current user
+   * - Clears all state data
+   * - Removes JWT token from localStorage
+   * - Notifies all subscribers
+   */
   logoutUser() {
+    console.log('StateManager: Logging out user');
+    
+    // Clear state
     this.state.user = null;
     this.state.transactions = [];
     this.state.savingsGoals = [];
     this.state.budgets = [];
     
+    // Clear storage
     this.storage.remove('user');
     this.storage.remove('transactions');
     this.storage.remove('savingsGoals');
     this.storage.remove('budgets');
     
+    // Remove JWT token
+    localStorage.removeItem('token');
+    
+    // Notify subscribers
     this.notify('user:updated', null);
     this.notify('transactions:updated', []);
     this.notify('savingsGoals:updated', []);
     this.notify('budgets:updated', []);
+    this.notify('auth:logout', null);
+    
+    console.log('StateManager: User logged out successfully');
   }
   
   async updateUser(data) {
