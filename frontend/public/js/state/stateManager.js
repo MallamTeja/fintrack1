@@ -733,6 +733,10 @@ class StateManager {
     try {
       const user = await this.api.post('/auth/login', credentials);
       this.state.user = user;
+      // Save JWT token to localStorage
+      if (user.token) {
+        localStorage.setItem('token', user.token);
+      }
       this.persistToStorage();
       this.notify('user:updated', user);
       

@@ -148,8 +148,9 @@ app.use((req, res) => {
 connectDB()
     .then(() => {
         const PORT = process.env.PORT || 5000;
+        const mode = process.env.NODE_ENV || 'development';
         app.listen(PORT, () => {
-            console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+            console.log(`Server running in ${mode} mode on port ${PORT}`);
             console.log(`API URL: http://localhost:${PORT}/api`);
         });
     })

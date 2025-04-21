@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const config = require('config');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 
@@ -40,9 +41,10 @@ router.post('/register', async (req, res) => {
         // Generate JWT token
         const token = jwt.sign(
             { userId: user._id },
-            process.env.JWT_SECRET,
+            config.get('jwtSecret'),
             { expiresIn: '24h' }
         );
+
 
         res.status(201).json({ 
             success: true,
@@ -96,9 +98,10 @@ router.post('/login', async (req, res) => {
         // Generate JWT token
         const token = jwt.sign(
             { userId: user._id },
-            process.env.JWT_SECRET,
+            config.get('jwtSecret'),
             { expiresIn: '24h' }
         );
+
 
         res.json({ 
             success: true,
