@@ -33,8 +33,4 @@ app.get('*', (req, res) => {
     res.redirect('/');
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Frontend server running on port ${PORT}`);
-    console.log(`Access the application at: http://localhost:${PORT}`);
-});
+module.exports = app;
