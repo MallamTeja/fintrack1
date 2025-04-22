@@ -111,7 +111,12 @@ class InsightsComponent {
    * @param {Array} savingsGoals - Updated savings goals
    */
   handleSavingsGoalsUpdated(savingsGoals) {
-    this.state.savingsGoals = savingsGoals;
+    // Defensive check for undefined or null savingsGoals
+    if (!Array.isArray(savingsGoals)) {
+      this.state.savingsGoals = [];
+    } else {
+      this.state.savingsGoals = savingsGoals;
+    }
     this.renderInsights();
   }
   

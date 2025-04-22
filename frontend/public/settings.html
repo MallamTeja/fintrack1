@@ -947,25 +947,6 @@
       }
     });
 
-    // Add logout functionality
-    const logoutButton = document.getElementById('logoutButton');
-    logoutButton.addEventListener('click', (e) => {
-      e.stopPropagation();
-      console.log('Logout clicked');
-      
-      // Remove token from localStorage
-      localStorage.removeItem('token');
-      
-      // Reset state via store if available
-      if (window.FinTrackState && window.FinTrackState.store) {
-        window.FinTrackState.store.dispatch('user:logout');
-      }
-      
-      // Redirect to login page
-      window.location.href = '/login.html';
-    });
-
-  </script>
   <script type="module" src="js/auth/logoutHandler.js"></script>
 </body>
 </html>

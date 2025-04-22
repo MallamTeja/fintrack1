@@ -9,25 +9,16 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="js/transactionService.js"></script>
   <script src="js/websocketService.js"></script>
-  <style>
+    <style>
     .progress-45 { width: 45%; }
     .progress-30 { width: 30%; }
     .progress-15 { width: 15%; }
     .progress-73 { width: 73%; }
 
-    @keyframes slideIn {
-      from { transform: translateX(-100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
-    .fade-in > * {
-      animation: slideIn 0.5s ease-out forwards;
-    }
-
-    .fade-in > *:nth-child(1) { animation-delay: 0.1s; }
-    .fade-in > *:nth-child(2) { animation-delay: 0.2s; }
-    .fade-in > *:nth-child(3) { animation-delay: 0.3s; }
-    .fade-in > *:nth-child(4) { animation-delay: 0.4s; }
 
     :root {
       --bg-light: #f8fafc;
@@ -39,7 +30,7 @@
       
       --bg-dark: #1e293b;
       --text-dark: #f8fafc; 
-      --card-bg-dark: #334155;
+      --card-bg-dark: #1e293b;
       --primary-dark: #4f46e5;
       --primary-hover-dark: #4338ca;
       --border-dark: #334155;
@@ -69,28 +60,20 @@
     }
 
     .card {
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px rgba(20, 40, 100, 0.3);
       border-radius: 1rem;
       transition: all 0.3s ease;
       border: 1px solid var(--border);
       background-color: var(--card-bg);
       color: var(--text-color);
       padding: 1.5rem;
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
-      background-color: rgba(255, 255, 255, 0.05);
       position: relative;
       overflow: hidden;
     }
 
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 4px;
-      background: linear-gradient(90deg, #3b82f6, #10b981);
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
     }
 
     .stat-card {
@@ -139,51 +122,7 @@
         margin: 0 0.25rem;
       }
     }
-
-    /* Loading Animation */
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    .chart-loading {
-      animation: pulse 1.5s ease-in-out infinite;
-      background: linear-gradient(110deg, var(--bg) 8%, var(--border) 18%, var(--bg) 33%);
-      border-radius: 1rem;
-      min-height: 200px;
-    }
-
-    /* Card Hover Effects */
-    .card {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
-      transform: translateX(-100%);
-      transition: transform 0.7s;
-    }
-
-    .card:hover::after {
-      transform: translateX(100%);
-    }
-
-    /* Fade-in Animation */
-    @keyframes fadeIn {
-      from { transform: translateX(-100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-
-    .fade-in > * {
-      animation: fadeIn 0.5s ease-out forwards;
-    }
-  </style>
+    </style>
 </head>
 <body class="transition-all duration-300 flex min-h-screen">
   <aside class="w-72 h-screen sticky top-0 left-0 p-6 space-y-6 shadow-lg transition-all bg-opacity-90 backdrop-blur-md hidden md:block">
@@ -227,7 +166,7 @@
       </a>
       <a href="settings.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Settings">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
         </svg>
         Settings
@@ -269,7 +208,7 @@
             </svg>
             Total Income
           </h3>
-          <p class="text-3xl font-bold text-green-500">₹62,000</p>
+          <p id="incomeValue" class="text-3xl font-bold text-green-500">₹0</p>
           <div class="flex items-center gap-1 mt-2">
             <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
@@ -284,7 +223,7 @@
             </svg>
             Total Expenses
           </h3>
-          <p class="text-3xl font-bold text-red-500">₹45,300</p>
+          <p id="expenseValue" class="text-3xl font-bold text-red-500">₹0</p>
           <div class="flex items-center gap-1 mt-2">
             <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6"/>
@@ -299,12 +238,12 @@
             </svg>
             Savings
           </h3>
-          <p class="text-3xl font-bold text-blue-500">₹16,700</p>
+          <p id="savingsValue" class="text-3xl font-bold text-blue-500">₹0</p>
           <div class="flex items-center gap-1 mt-2">
             <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5"/>
             </svg>
-            <p class="text-sm text-blue-500">27% of income</p>
+            <p id="savingsPercentageValue" class="text-sm text-blue-500">0% of income</p>
           </div>
         </div>
         <div class="card stat-card budget-card hover:scale-105">
@@ -488,6 +427,7 @@
       
       // Subscribe to transaction updates
       transactionService.subscribe(transactions => {
+        updateStatCards(transactions);
         updateChartsWithRealData(transactions);
       });
       
@@ -745,11 +685,22 @@
         }, 800);
       }
     }
-    // Load saved theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      htmlElement.setAttribute('data-theme', savedTheme);
-      updateThemeIcon();
+
+    // Dynamically update stat cards in real time
+    function updateStatCards(transactions) {
+      let income = 0, expenses = 0;
+      transactions.forEach(tx => {
+        const amt = Number(tx.amount);
+        if (tx.type === 'income') income += amt;
+        else expenses += Math.abs(amt);
+      });
+      const savings = income - expenses;
+      const savingsPerc = income > 0 ? Math.round((savings / income) * 100) : 0;
+      const fmt = v => '₹' + v.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+      const incEl = document.getElementById('incomeValue'); if (incEl) incEl.textContent = fmt(income);
+      const expEl = document.getElementById('expenseValue'); if (expEl) expEl.textContent = fmt(expenses);
+      const savEl = document.getElementById('savingsValue'); if (savEl) savEl.textContent = fmt(savings);
+      const savPercEl = document.getElementById('savingsPercentageValue'); if (savPercEl) savPercEl.textContent = savingsPerc + '% of income';
     }
   </script>
   <script type="module" src="js/auth/logoutHandler.js"></script>

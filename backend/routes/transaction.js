@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Transaction = require('../models/Transaction');
 const auth = require('../middleware/auth');
+const { broadcastToUser } = require('../websocketManager');
 
 // Get all transactions for authenticated user
 router.get('/', auth, async (req, res) => {
@@ -57,6 +58,9 @@ router.post('/', auth, async (req, res) => {
             req.user.balance -= amount;
         }
         await req.user.save();
+
+        // Broadcast new transaction to user's WebSocket connections
+        broadcastToUser(req.user._id.toString(), 'transaction:added', savedTransaction);
 
         res.status(201).json(savedTransaction);
     } catch (error) {

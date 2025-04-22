@@ -85,6 +85,6 @@ class WebSocketService {
     }
 }
 
-// Create global instance
-window.websocketService = new WebSocketService();
-window.addEventListener('load', () => websocketService.connect());
+window.FinTrackState = window.FinTrackState || {};
+window.FinTrackState.webSocketService = new WebSocketService();
+window.addEventListener('load', () => window.FinTrackState.webSocketService.connect());

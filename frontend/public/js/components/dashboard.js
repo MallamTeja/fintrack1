@@ -20,6 +20,7 @@ class DashboardComponent {
       incomeCard: document.querySelector('.card.income p.text-2xl'),
       expensesCard: document.querySelector('.card:not(.income):nth-child(3) p.text-2xl'),
       savingRateCard: document.querySelector('.card:nth-child(4) p.text-2xl'),
+      balanceChange: document.getElementById('balanceChange'),
       
       // Category cards
       foodAmount: document.getElementById('foodAmount'),
@@ -226,6 +227,7 @@ class DashboardComponent {
     if (this.elements.incomeCard) this.elements.incomeCard.textContent = '₹0';
     if (this.elements.expensesCard) this.elements.expensesCard.textContent = '₹0';
     if (this.elements.savingRateCard) this.elements.savingRateCard.textContent = '₹0';
+    if (this.elements.balanceChange) this.elements.balanceChange.textContent = '';
     
     // Set all category amounts to zero
     if (this.elements.foodAmount) this.elements.foodAmount.textContent = '₹0';
@@ -312,24 +314,24 @@ class DashboardComponent {
       if (isNaN(amount)) return;
       
       // Update income/expense totals
-      if (tx.type === 'income' || amount > 0) {
+      if (tx.type === 'income') {
         income += Math.abs(amount);
-      } else {
+      } else if (tx.type === 'expense') {
         expenses += Math.abs(amount);
       }
       
       // Update category totals
       const category = tx.category || 'other';
       if (byCategory[category] !== undefined) {
-        if (tx.type === 'income' || amount > 0) {
+        if (tx.type === 'income') {
           byCategory[category] += Math.abs(amount);
-        } else {
+        } else if (tx.type === 'expense') {
           byCategory[category] -= Math.abs(amount);
         }
       } else {
-        if (tx.type === 'income' || amount > 0) {
+        if (tx.type === 'income') {
           byCategory.other += Math.abs(amount);
-        } else {
+        } else if (tx.type === 'expense') {
           byCategory.other -= Math.abs(amount);
         }
       }
@@ -339,9 +341,9 @@ class DashboardComponent {
         byMonth[monthKey] = { income: 0, expenses: 0 };
       }
       
-      if (tx.type === 'income' || amount > 0) {
+      if (tx.type === 'income') {
         byMonth[monthKey].income += Math.abs(amount);
-      } else {
+      } else if (tx.type === 'expense') {
         byMonth[monthKey].expenses += Math.abs(amount);
       }
       
@@ -351,9 +353,9 @@ class DashboardComponent {
           dailyBalance[dayKey] = 0;
         }
         
-        if (tx.type === 'income' || amount > 0) {
+        if (tx.type === 'income') {
           dailyBalance[dayKey] += Math.abs(amount);
-        } else {
+        } else if (tx.type === 'expense') {
           dailyBalance[dayKey] -= Math.abs(amount);
         }
       }
@@ -372,6 +374,17 @@ class DashboardComponent {
       dailyBalanceArray.push(runningBalance);
     }
     
+    // Compute weekly balance change (last 7 days)
+    let weeklyChange = 0;
+    if (dailyBalanceArray.length > 7) {
+      const n = dailyBalanceArray.length;
+      const curr = dailyBalanceArray[n - 1];
+      const prev = dailyBalanceArray[n - 8];
+      if (prev !== 0) {
+        weeklyChange = ((curr - prev) / Math.abs(prev)) * 100;
+      }
+    }
+    
     return {
       income,
       expenses,
@@ -379,7 +392,8 @@ class DashboardComponent {
       savingRate,
       byCategory,
       byMonth,
-      dailyBalanceArray
+      dailyBalanceArray,
+      weeklyChange
     };
   }
   
@@ -411,6 +425,16 @@ class DashboardComponent {
     // Update saving rate card
     if (this.elements.savingRateCard) {
       this.elements.savingRateCard.textContent = formatCurrency(stats.savingRate) + '%';
+    }
+    
+    // Update weekly balance change
+    const changeEl = document.getElementById('balanceChange');
+    if (changeEl && typeof stats.weeklyChange === 'number') {
+      const change = stats.weeklyChange;
+      const sign = change >= 0 ? '+' : '';
+      changeEl.textContent = `${sign}${change.toFixed(1)}% from last week`;
+      changeEl.classList.toggle('text-green-500', change >= 0);
+      changeEl.classList.toggle('text-red-500', change < 0);
     }
   }
   

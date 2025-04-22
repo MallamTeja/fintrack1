@@ -104,7 +104,18 @@ class WSStoreSyncService {
     const action = this.eventMap[event];
     
     if (action) {
-      // Check for conflicts before dispatching
+      // If transaction added via WebSocket, update state without API call
+      if (event === 'transaction:added') {
+        const currentTransactions = store.getState('transactions') || [];
+        const newTransactions = [data, ...currentTransactions];
+        // Update store state directly
+        store.state.transactions = newTransactions;
+        store.notify('transactions:updated', newTransactions);
+        store.notify('transaction:added', data);
+        this.lastSyncTimestamps['transaction'] = Date.now();
+        return;
+      }
+      
       const entityType = this.getEntityTypeFromEvent(event);
       
       if (entityType && this.hasLocalChanges(entityType, data)) {

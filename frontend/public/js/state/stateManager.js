@@ -1,4 +1,4 @@
-/**
+rd/**
  * StateManager - Centralized state management for FinTrack application
  * 
  * This module provides a centralized state store with:
@@ -81,7 +81,7 @@ class StateManager {
    * @param {string} actionType - Type of action (e.g., 'transaction:add')
    * @param {*} payload - Data associated with the action
    */
-  async dispatch(actionType, payload) {
+    async dispatch(actionType, payload) {
     console.log(`Dispatching action: ${actionType}`, payload);
     
     try {
@@ -113,6 +113,11 @@ class StateManager {
           break;
         case 'savingsGoal:delete':
           await this.deleteSavingsGoal(payload);
+          break;
+        case 'savingsGoal:setAll':
+          this.state.savingsGoals = payload;
+          this.persistToStorage();
+          this.notify('savingsGoals:updated', payload);
           break;
           
         // Budget actions

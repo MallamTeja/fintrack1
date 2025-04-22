@@ -6,10 +6,17 @@
 import { store } from '../state/index.js';
 
 function setupLogout() {
-  const logoutButton = document.getElementById('logoutButton');
-  if (!logoutButton) return;
+  const attachListener = () => {
+    const logoutButton = document.getElementById('logoutButton');
+    if (!logoutButton) return;
 
-  logoutButton.addEventListener('click', (e) => {
+    // Remove any existing listener to avoid duplicates
+    logoutButton.removeEventListener('click', handleLogout);
+
+    logoutButton.addEventListener('click', handleLogout);
+  };
+
+  const handleLogout = (e) => {
     e.stopPropagation();
     console.log('Logout clicked');
 
@@ -23,11 +30,18 @@ function setupLogout() {
 
     // Redirect to login page
     window.location.href = '/login.html';
-  });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', attachListener);
+  } else {
+    // DOM already loaded
+    attachListener();
+  }
 }
 
-// Setup logout on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', setupLogout);
+// Setup logout on script load
+setupLogout();
 
 // Export for ES modules
 export { setupLogout };

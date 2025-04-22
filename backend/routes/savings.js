@@ -77,4 +77,100 @@ router.delete('/:id', auth, async (req, res) => {
     }
 });
 
-module.exports = router; 
+/**
+ * Bulk save savings goals
+ * Accepts an array of savings goals and creates or updates them in the database
+ */
+router.post('/bulk', auth, async (req, res) => {
+    try {
+        const goals = req.body;
+        if (!Array.isArray(goals)) {
+            return res.status(400).json({ error: 'Request body must be an array of savings goals' });
+        }
+
+        const userId = req.user._id;
+        const savedGoals = [];
+
+        for (const goalData of goals) {
+            if (goalData._id) {
+                // Update existing goal
+                const updatedGoal = await SavingsGoal.findOneAndUpdate(
+                    { _id: goalData._id, user_id: userId },
+                    goalData,
+                    { new: true, runValidators: true }
+                );
+                if (updatedGoal) {
+                    savedGoals.push(updatedGoal);
+                }
+            } else {
+                // Create new goal
+                const newGoal = new SavingsGoal({
+                    ...goalData,
+                    user_id: userId
+                });
+                await newGoal.save();
+                savedGoals.push(newGoal);
+            }
+        }
+
+        // Emit WebSocket event for real-time updates
+        for (const goal of savedGoals) {
+            broadcastEvent('savingsGoal:updated', goal);
+            broadcastToUser(userId.toString(), 'savingsGoal:updated', goal);
+        }
+
+        res.json(savedGoals);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+/**
+ * Bulk save savings goals
+ * Accepts an array of savings goals and creates or updates them in the database
+ */
+router.post('/bulk', auth, async (req, res) => {
+    try {
+        const goals = req.body;
+        if (!Array.isArray(goals)) {
+            return res.status(400).json({ error: 'Request body must be an array of savings goals' });
+        }
+
+        const userId = req.user._id;
+        const savedGoals = [];
+
+        for (const goalData of goals) {
+            if (goalData._id) {
+                // Update existing goal
+                const updatedGoal = await SavingsGoal.findOneAndUpdate(
+                    { _id: goalData._id, user_id: userId },
+                    goalData,
+                    { new: true, runValidators: true }
+                );
+                if (updatedGoal) {
+                    savedGoals.push(updatedGoal);
+                }
+            } else {
+                // Create new goal
+                const newGoal = new SavingsGoal({
+                    ...goalData,
+                    user_id: userId
+                });
+                await newGoal.save();
+                savedGoals.push(newGoal);
+            }
+        }
+
+        // Emit WebSocket event for real-time updates
+        for (const goal of savedGoals) {
+            broadcastEvent('savingsGoal:updated', goal);
+            broadcastToUser(userId.toString(), 'savingsGoal:updated', goal);
+        }
+
+        res.json(savedGoals);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+module.exports = router;

@@ -217,7 +217,7 @@
       </a>
       <a href="insights.html" class="flex items-center gap-2 text-lg font-semibold transition-colors duration-300 rounded-md bg-blue-500 text-white active" title="Insights">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5"/>
         </svg>
         Insights
       </a>
@@ -367,7 +367,7 @@
             <span class="text-blue-500 font-medium">30%</span>
           </div>
 
-          <button class="mt-4 w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+          <button class="mt-4 w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors add-fund-btn">
             Add Fund
           </button>
         </div>
@@ -409,7 +409,7 @@
             <span class="text-purple-500 font-medium">25%</span>
           </div>
 
-          <button class="mt-4 w-full py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-md transition-colors">
+          <button class="mt-4 w-full py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-md transition-colors add-fund-btn">
             Add Fund
           </button>
         </div>
@@ -451,7 +451,7 @@
             <span class="text-green-500 font-medium">100%</span>
           </div>
 
-          <button class="mt-4 w-full py-2 bg-green-500 hover:bg-green-600 text-white rounded-md transition-colors">
+          <button class="mt-4 w-full py-2 bg-green-500 hover:bg-green-600 text-white rounded-md transition-colors add-fund-btn">
             Add Fund
           </button>
         </div>
@@ -573,6 +573,14 @@
 
     // Initialize theme icon
     updateThemeIcon();
+
+    // Add Fund button functionality
+    const addFundBtns = document.querySelectorAll('.add-fund-btn');
+    addFundBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            alert('Add Fund clicked');
+        });
+    });
   </script>
   <script type="module" src="js/auth/logoutHandler.js"></script>
 </body>
