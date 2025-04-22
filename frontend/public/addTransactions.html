@@ -579,21 +579,27 @@
       submitButton.disabled = true;
       submitButton.textContent = 'Adding...';
 
-      // Simulate async submission (e.g., API call)
-      setTimeout(() => {
-        // On success
-        alert('Transaction added successfully');
-
-        // Reset form
-        transactionForm.reset();
-        loadCategories('expense'); // default to expense
-        dateInput.valueAsDate = new Date();
-        clearQuickAmountSelection();
-
+      // Perform real API call to add transaction
+      try {
+        const newTransaction = await window.transactionService.addTransaction(transactionData);
+        if (newTransaction) {
+          alert('Transaction added successfully');
+          // Reset form
+          transactionForm.reset();
+          loadCategories('expense'); // default to expense
+          dateInput.valueAsDate = new Date();
+          clearQuickAmountSelection();
+        } else {
+          alert('Failed to add transaction');
+        }
+      } catch (error) {
+        console.error('Error adding transaction:', error);
+        alert('Error adding transaction');
+      } finally {
         // Restore button
         submitButton.disabled = false;
         submitButton.textContent = 'Add Transaction';
-      }, 1000);
+      }
     });
 
     // Initial load categories for default selected transaction type

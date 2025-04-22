@@ -40,22 +40,22 @@ class ExpensesLimits {
     budgets.forEach(b => this.createCard(b));
   }
 
-  createCard(budget) {
+createCard(budget) {
     const card = document.createElement('div');
     card.className = 'limit-card';
     const limit = budget.limit;
     const spent = budget.current_spending || 0;
     const perc = Math.min((spent / limit) * 100, 100);
     card.innerHTML = `
-      <h4 class="text-lg font-semibold">${this.formatCategory(budget.category)}</h4>
+      <h4>${this.formatCategory(budget.category)}</h4>
       <p>Limit: ₹${limit}</p>
       <p>Spent: ₹${spent}</p>
-      <div class="progress-bar my-2">
-        <div class="progress-fill" style="width:${perc}%; background:var(--primary)"></div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${perc}%;"></div>
       </div>
       <div class="flex gap-2 mt-2">
-        <button class="edit-btn text-sm text-blue-500" data-id="${budget._id}">Edit</button>
-        <button class="delete-btn text-sm text-red-500" data-id="${budget._id}">Delete</button>
+        <button class="edit-btn" data-id="${budget._id}">Edit</button>
+        <button class="delete-btn" data-id="${budget._id}">Delete</button>
       </div>
     `;
     card.querySelector('.edit-btn').addEventListener('click', () => this.openEditModal(budget));
