@@ -24,6 +24,9 @@ const transactionRoutes = require('./routes/transaction');
 const budgetRoutes = require('./routes/budget');
 const savingsRoutes = require('./routes/savings');
 
+const http = require('http');
+const { initializeWebSocketServer } = require('./websocketManager');
+
 const app = express();
 
 // Security middleware
@@ -144,12 +147,20 @@ app.use((req, res) => {
     });
 });
 
-// Connect to MongoDB
+// Connect to MongoDB and start HTTP and WebSocket servers
 connectDB()
     .then(() => {
         const PORT = process.env.PORT || 5000;
         const mode = process.env.NODE_ENV || 'development';
-        app.listen(PORT, () => {
+
+        // Create HTTP server from Express app
+        const server = http.createServer(app);
+
+        // Initialize WebSocket server with HTTP server
+        initializeWebSocketServer(server);
+
+        // Start listening on the HTTP server
+        server.listen(PORT, () => {
             console.log(`Server running in ${mode} mode on port ${PORT}`);
             console.log(`API URL: http://localhost:${PORT}/api`);
         });
@@ -158,9 +169,6 @@ connectDB()
         console.error('Failed to connect to database:', err);
         process.exit(1);
     });
-
-// WebSocket server initialization is disabled for Vercel deployment
-// as serverless functions do not support persistent WebSocket connections.
 
 // Export the Express app for Vercel serverless function
 module.exports = app;

@@ -8,6 +8,12 @@ class TransactionService {
         
         // Load initial data
         this.fetchTransactions();
+
+        // Subscribe to websocket events for real-time updates
+        if (window.websocketService) {
+            window.websocketService.subscribe('transaction_added', this.handleTransactionAdded.bind(this));
+            window.websocketService.subscribe('transaction_updated', this.handleTransactionUpdated.bind(this));
+        }
     }
     
     // Subscribe to transaction updates
@@ -68,6 +74,24 @@ class TransactionService {
         } catch (error) {
             console.error('Error adding transaction:', error);
             return null;
+        }
+    }
+
+    // Handle websocket event for transaction added
+    handleTransactionAdded(transaction) {
+        // Avoid duplicates
+        if (!this.transactions.find(tx => tx._id === transaction._id)) {
+            this.transactions.unshift(transaction);
+            this.notifySubscribers();
+        }
+    }
+
+    // Handle websocket event for transaction updated
+    handleTransactionUpdated(updatedTransaction) {
+        const index = this.transactions.findIndex(tx => tx._id === updatedTransaction._id);
+        if (index !== -1) {
+            this.transactions[index] = updatedTransaction;
+            this.notifySubscribers();
         }
     }
 }

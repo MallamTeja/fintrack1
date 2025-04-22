@@ -83,6 +83,7 @@ class DashboardComponent {
    * @param {Array} transactions - Updated transactions
    */
   handleTransactionsUpdated(transactions) {
+    console.log('DashboardComponent: Transactions updated:', transactions);
     this.state.transactions = transactions;
     this.renderDashboard();
   }

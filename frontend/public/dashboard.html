@@ -511,6 +511,19 @@
       profileButton.setAttribute('aria-expanded', 'false');
     });
 
+    // Initialize theme from saved preference
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      htmlElement.setAttribute('data-theme', savedTheme);
+    }
+    updateThemeIcon();
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = htmlElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      htmlElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      updateThemeIcon();
+    });
   </script>
   <script type="module" src="js/auth/logoutHandler.js"></script>
   <!-- WebSocket Connection Status -->  

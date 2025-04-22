@@ -1,0 +1,76 @@
+/* Styles for Expense Limits cards to match Dashboard cards */
+
+.limit-card {
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-radius: 0.5rem; /* rounded-lg */
+  padding: 1rem; /* p-4 */
+  margin-bottom: 1rem;
+  transition: box-shadow 0.3s ease;
+  cursor: default;
+}
+
+.limit-card:hover {
+  box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+}
+
+.limit-card h4 {
+  font-weight: 600; /* font-semibold */
+  font-size: 1.125rem; /* text-lg */
+  color: #1f2937; /* text-gray-800 */
+  margin-bottom: 0.5rem;
+}
+
+.limit-card p {
+  color: #4b5563; /* text-gray-600 */
+  margin: 0.25rem 0;
+}
+
+.limit-card .progress-bar {
+  width: 100%;
+  background-color: #e5e7eb; /* bg-gray-200 */
+  border-radius: 9999px; /* rounded-full */
+  height: 0.75rem; /* h-3 */
+  overflow: hidden;
+  margin: 0.5rem 0;
+}
+
+.limit-card .progress-fill {
+  height: 0.75rem;
+  border-radius: 9999px;
+  background-color: #10b981; /* bg-green-500 */
+  transition: width 0.5s ease;
+}
+
+.limit-card .edit-btn,
+.limit-card .delete-btn {
+  font-size: 0.875rem; /* text-sm */
+  transition: color 0.3s ease;
+  cursor: pointer;
+}
+
+.limit-card .edit-btn {
+  color: #3b82f6; /* text-blue-500 */
+}
+
+.limit-card .edit-btn:hover {
+  color: #2563eb; /* text-blue-700 */
+}
+
+.limit-card .delete-btn {
+  color: #ef4444; /* text-red-500 */
+}
+
+.limit-card .delete-btn:hover {
+  color: #b91c1c; /* text-red-700 */
+}
+
+/* Optional animation for card appearance */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.limit-card {
+  animation: fadeIn 0.3s ease forwards;
+}

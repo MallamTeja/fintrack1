@@ -6,6 +6,7 @@ class WebSocketService {
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
         this.reconnectDelay = 1000; // Start with 1 second
+        this.token = localStorage.getItem('token'); // Get JWT token from localStorage
     }
 
     connect() {
@@ -16,6 +17,11 @@ class WebSocketService {
                 console.log('WebSocket connected');
                 this.reconnectAttempts = 0;
                 this.reconnectDelay = 1000;
+
+                // Send subscribe message with token for authentication
+                if (this.token) {
+                    this.send('subscribe', { token: this.token });
+                }
             };
 
             this.socket.onmessage = (event) => {
@@ -72,7 +78,7 @@ class WebSocketService {
 
     send(type, data) {
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(JSON.stringify({ type, data }));
+            this.socket.send(JSON.stringify({ type, ...data }));
         } else {
             console.error('WebSocket is not connected');
         }
