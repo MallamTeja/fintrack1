@@ -72,12 +72,13 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Login user
 router.post('/login', async (req, res) => {
     try {
+        console.log('Login request received:', req.body);
         const { email, password } = req.body;
 
         if (!email || !password) {
+            console.log('Missing email or password');
             return res.status(400).json({ 
                 error: 'Please provide both email and password' 
             });
@@ -86,12 +87,14 @@ router.post('/login', async (req, res) => {
         // Find user
         const user = await User.findOne({ email });
         if (!user) {
+            console.log('User not found:', email);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
         // Check password
         const isMatch = await user.comparePassword(password);
         if (!isMatch) {
+            console.log('Password mismatch for user:', email);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
 
@@ -102,6 +105,7 @@ router.post('/login', async (req, res) => {
             { expiresIn: '24h' }
         );
 
+        console.log('Login successful for user:', email);
 
         res.json({ 
             success: true,

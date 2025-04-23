@@ -294,7 +294,7 @@
                 const data = await response.json();
                 
                 if (!response.ok) {
-                    throw new Error(data.message || 'Login failed');
+                    throw new Error(data.message || data.error || 'Login failed');
                 }
 
                 if (data.success) {
@@ -312,7 +312,7 @@
                     }, 1000);
                 } else {
                     hideLoading();
-                    emailError.textContent = data.message || 'Login failed';
+                    emailError.textContent = data.message || data.error || 'Login failed';
                     emailError.style.display = 'block';
                     emailInput.setAttribute('aria-invalid', 'true');
                 }

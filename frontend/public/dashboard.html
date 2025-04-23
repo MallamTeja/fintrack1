@@ -524,6 +524,21 @@
       localStorage.setItem('theme', newTheme);
       updateThemeIcon();
     });
+
+    // Load and display user name and avatar
+    if (window.storageService) {
+      const userObj = storageService.get('user');
+      if (userObj) {
+        const name = userObj.user?.name ?? userObj.name ?? '';
+        const email = userObj.user?.email ?? userObj.email ?? '';
+        const avatarDiv = profileButton.querySelector('div');
+        const nameSpan = profileButton.querySelector('span');
+        if (avatarDiv) avatarDiv.textContent = name.charAt(0).toUpperCase();
+        if (nameSpan) nameSpan.textContent = name;
+        const emailDiv = document.querySelector('#profileDropdown .text-sm');
+        if (emailDiv) emailDiv.textContent = email;
+      }
+    }
   </script>
   <script type="module" src="js/auth/logoutHandler.js"></script>
   <!-- WebSocket Connection Status -->  
