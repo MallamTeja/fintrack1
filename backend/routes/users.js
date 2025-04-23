@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const auth = require('../middleware/auth');
 
 // @route   POST api/users/register
 // @desc    Register a user
@@ -16,11 +18,15 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ msg: 'User already exists' });
         }
 
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         // Create new user
         user = new User({
             name,
             email,
-            password
+            password: hashedPassword
         });
 
         // Save user to database
@@ -61,8 +67,8 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ msg: 'Invalid credentials' });
         }
 
-        // Verify password (plain string comparison)
-        const isMatch = password === user.password;
+        // Verify password using bcrypt
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ msg: 'Invalid credentials' });
         }
@@ -89,17 +95,15 @@ router.post('/login', async (req, res) => {
     }
 });
 
-router.get('/', async (req, res) => {
+// @route   GET api/users/me
+// @desc    Get current user
+// @access  Private
+router.get('/me', auth, async (req, res) => {
     try {
-        // Get user ID from token
-        const userId = req.user.id;
-
-        // Find user by ID
-        const user = await User.findById(userId).select('-password'); // Exclude password from response
+        const user = await User.findById(req.user.id).select('-password');
         if (!user) {
             return res.status(404).json({ msg: 'User not found' });
         }
-
         res.json(user);
     } catch (err) {
         console.error(err.message);

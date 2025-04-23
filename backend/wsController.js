@@ -82,6 +82,48 @@ function initializeWebSocketServer(server) {
               payload: data.payload
             });
             break;
+
+          case 'addBudget':
+            broadcastToAuthenticated(wss, {
+              type: 'budget:added',
+              payload: data.payload
+            });
+            break;
+
+          case 'updateBudget':
+            broadcastToAuthenticated(wss, {
+              type: 'budget:updated',
+              payload: data.payload
+            });
+            break;
+
+          case 'deleteBudget':
+            broadcastToAuthenticated(wss, {
+              type: 'budget:deleted',
+              payload: data.payload
+            });
+            break;
+
+          case 'addSavingsGoal':
+            broadcastToAuthenticated(wss, {
+              type: 'savingsGoal:added',
+              payload: data.payload
+            });
+            break;
+
+          case 'updateSavingsGoal':
+            broadcastToAuthenticated(wss, {
+              type: 'savingsGoal:updated',
+              payload: data.payload
+            });
+            break;
+
+          case 'deleteSavingsGoal':
+            broadcastToAuthenticated(wss, {
+              type: 'savingsGoal:deleted',
+              payload: data.payload
+            });
+            break;
             
           case 'ping':
             ws.send(JSON.stringify({ type: 'pong' }));

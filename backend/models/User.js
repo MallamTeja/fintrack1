@@ -40,13 +40,9 @@ const UserSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Method to compare password (plain string comparison)
-UserSchema.methods.comparePassword = async function(candidatePassword) {
-    try {
-        return candidatePassword === this.password;
-    } catch (error) {
-        throw error;
-    }
+// Method to compare password directly
+UserSchema.methods.comparePassword = function(candidatePassword) {
+    return this.password === candidatePassword;
 };
 
 module.exports = mongoose.model('User', UserSchema);

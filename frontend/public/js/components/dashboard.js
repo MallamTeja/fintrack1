@@ -84,7 +84,6 @@ class DashboardComponent {
    * @param {Array} transactions - Updated transactions
    */
   handleTransactionsUpdated(transactions) {
-    console.log('DashboardComponent: Transactions updated:', transactions);
     this.state.transactions = transactions;
     this.renderDashboard();
   }
@@ -94,7 +93,6 @@ class DashboardComponent {
    * @param {Array} savingsGoals - Updated savings goals
    */
   handleSavingsGoalsUpdated(savingsGoals) {
-    // Defensive check for undefined or null savingsGoals
     if (!Array.isArray(savingsGoals)) {
       this.state.savingsGoals = [];
     } else {
@@ -127,6 +125,10 @@ class DashboardComponent {
    */
   handleErrorChanged(data) {
     this.state.errors[data.entity] = data.error;
+    // Suppress "Service not available" error messages
+    if (data.error && data.error.toLowerCase().includes('service not available')) {
+      return;
+    }
     this.showError(data.entity, data.error);
   }
   
@@ -205,6 +207,11 @@ class DashboardComponent {
    */
   showError(entity, error) {
     if (!error) return;
+
+    // Suppress "Service not available" error messages
+    if (error.toLowerCase().includes('service not available')) {
+      return;
+    }
     
     const notificationDiv = document.createElement('div');
     notificationDiv.className = 'fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-500 opacity-0 bg-red-500 text-white';

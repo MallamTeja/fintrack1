@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const bcrypt = require('bcryptjs');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 
@@ -29,11 +30,15 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'User already exists with this email' });
         }
 
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         // Create new user
         user = new User({
             name,
             email,
-            password
+            password: hashedPassword
         });
 
         await user.save();
@@ -92,7 +97,7 @@ router.post('/login', async (req, res) => {
         }
 
         // Check password
-        const isMatch = await user.comparePassword(password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             console.log('Password mismatch for user:', email);
             return res.status(401).json({ error: 'Invalid credentials' });
@@ -121,6 +126,13 @@ router.post('/login', async (req, res) => {
         console.error('Login error:', error);
         res.status(500).json({ error: 'Login failed. Please try again.' });
     }
+});
+
+// Logout endpoint to invalidate token (optional implementation)
+router.post('/logout', auth, (req, res) => {
+    // Since JWT is stateless, logout can be handled on client side by deleting token
+    // Optionally, implement token blacklist here if needed
+    res.json({ success: true, message: 'Logged out successfully' });
 });
 
 // Get current user
