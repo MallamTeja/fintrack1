@@ -1,16 +1,17 @@
 /**
  * Navigation Bar Styles
- * Based on the design from the settings page
+ * Updated to match the design and theme colors from frontend/public/css/navbar.css (settings page)
  */
 
 /* Main Navigation Container */
 .navbar {
-  background-color: #ffffff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg);
+  box-shadow: none;
   position: sticky;
   top: 0;
   z-index: 1000;
   width: 100%;
+  transition: background-color 0.3s ease;
 }
 
 .navbar-container {
@@ -30,7 +31,7 @@
 }
 
 .navbar-logo a {
-  color: #1a73e8;
+  color: var(--primary);
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -55,37 +56,46 @@
 }
 
 .navbar-links li a {
-  color: #5f6368;
+  background-color: transparent;
+  color: var(--text-color);
   text-decoration: none;
-  padding: 1.5rem 1rem;
+  padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
-  transition: color 0.3s ease;
+  gap: 0.75rem;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  margin: 0.25rem 0;
+  position: relative;
 }
 
 .navbar-links li a i {
-  margin-right: 0.5rem;
   font-size: 1.1rem;
 }
 
+/* Active link */
 .navbar-links li.active a {
-  color: #1a73e8;
-  font-weight: 600;
+  background-color: var(--primary);
+  color: white !important;
 }
 
-/* Active indicator line */
 .navbar-links li.active::after {
   content: '';
   position: absolute;
-  bottom: 0;
+  bottom: -4px;
   left: 0;
   width: 100%;
   height: 3px;
-  background-color: #1a73e8;
+  background-color: var(--primary-hover);
+  border-radius: 0.5rem;
 }
 
-.navbar-links li a:hover {
-  color: #1a73e8;
+/* Hover effect */
+.navbar-links li a:hover:not(.active) {
+  background-color: var(--primary);
+  color: white !important;
+  transform: translateX(4px);
 }
 
 /* User Profile Section */
@@ -105,7 +115,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: #1a73e8;
+  background-color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,7 +133,7 @@
 
 .user-name {
   font-weight: 500;
-  color: #3c4043;
+  color: var(--text-color);
 }
 
 .user-dropdown {
@@ -134,17 +144,18 @@
   display: none;
   position: absolute;
   right: 0;
-  background-color: #fff;
+  background-color: var(--card-bg);
   min-width: 180px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   overflow: hidden;
   z-index: 1001;
   top: 40px;
+  color: var(--text-color);
 }
 
 .dropdown-content a {
-  color: #3c4043;
+  color: var(--text-color);
   padding: 12px 16px;
   text-decoration: none;
   display: block;
@@ -153,7 +164,8 @@
 }
 
 .dropdown-content a:hover {
-  background-color: #f5f5f5;
+  background-color: var(--primary-hover);
+  color: white;
 }
 
 .logout-button {
@@ -192,21 +204,21 @@
 }
 
 .login-button {
-  color: #1a73e8;
+  color: var(--primary);
   margin-right: 12px;
 }
 
 .login-button:hover {
-  background-color: rgba(26, 115, 232, 0.1);
+  background-color: rgba(37, 99, 235, 0.1);
 }
 
 .register-button {
-  background-color: #1a73e8;
+  background-color: var(--primary);
   color: white;
 }
 
 .register-button:hover {
-  background-color: #0d62d0;
+  background-color: var(--primary-hover);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
@@ -223,7 +235,7 @@
 .mobile-menu-toggle span {
   width: 100%;
   height: 3px;
-  background-color: #5f6368;
+  background-color: var(--text-color);
   border-radius: 10px;
   transition: all 0.3s ease;
 }
@@ -264,7 +276,7 @@
     left: -100%;
     width: 70%;
     height: 100vh;
-    background-color: white;
+    background-color: var(--card-bg);
     z-index: 1001;
     transition: left 0.3s ease;
     box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
@@ -301,6 +313,7 @@
     right: 0;
     left: auto;
     bottom: auto;
+    border-radius: 0;
   }
   
   .user-profile .user-name {

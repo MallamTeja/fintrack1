@@ -93,12 +93,30 @@
     }
 
     [data-theme="light"] nav a.active {
-      background-color: #e5e7eb;
+      background-color: #2563eb;
+      color: white !important;
     }
 
     [data-theme="light"] #profileButton {
       background-color: white;
       color: black;
+      border-top-right-radius: 0.5rem;
+      padding-top: 0.25rem;
+      padding-right: 0.5rem;
+      border-radius: 1.5rem !important;
+      border: 1px solid #d1d5db; /* light gray - gray-300 */
+    }
+    [data-theme="dark"] #profileButton {
+      background-color: #1e293b;
+      color: white;
+      border-top-right-radius: 0.5rem;
+      padding-top: 0.25rem;
+      padding-right: 0.5rem;
+      border-radius: 1.5rem !important;
+      border: 1px solid #9ca3af; /* lighter gray - gray-400 */
+    }
+    [data-theme="light"] #profileButton span {
+      color: black !important;
     }
 
     [data-theme="light"] #profileButton:hover {
@@ -161,7 +179,8 @@
       transform: translateX(4px);
     }
 
-    nav a.active::after {
+/* Removed the right side white line on active nav link */
+    /* nav a.active::after {
       content: '';
       position: absolute;
       right: -8px;
@@ -169,7 +188,7 @@
       width: 4px;
       background: rgb(238, 234, 234);
       border-radius: 2px;
-    }
+    } */
 
     @media (max-width: 768px) {
       nav {
@@ -183,13 +202,14 @@
         min-width: fit-content;
         margin: 0 0.25rem;
       }
-      nav a.active::after {
+/* Removed the bottom line on active nav link in mobile view */
+/*      nav a.active::after {
         right: auto;
         bottom: -4px;
         left: 0;
         width: 100%;
         height: 3px;
-      }
+      } */
     }
 
     /* Fade-in Animation */
@@ -217,6 +237,8 @@
       border: 1px solid var(--border);
       background-color: var(--card-bg);
       color: var(--text-color);
+      padding: 1rem;
+      margin-bottom: 1rem;
     }
 
     .card:hover {
@@ -290,8 +312,7 @@
     </a>
     <a href="settings.html" class="flex items-center gap-2 text-lg text-black transition-colors duration-300 rounded-md hover:bg-blue-500 hover:text-white" title="Settings">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543.94 3.31-.826 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
       </svg>
       Settings
     </a>
@@ -318,15 +339,18 @@
             <span class="font-medium text-black dark:text-gray-200">User</span>
           </button>
           <div id="profileDropdown" 
-               class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 hidden transition-all duration-200 transform origin-top">
-            <div class="py-1" role="menu" aria-orientation="vertical">
-              <div class="px-4 py-2 text-sm text-gray-700 dark:text-gray-200">john@example.com</div>
-              <button id="logoutButton" 
-                      class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600"
-                      role="menuitem">
-                Logout
-              </button>
+               class="absolute right-0 mt-2 w-48 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 hidden transition-all duration-200 transform origin-top bg-white dark:bg-gray-700"
+               role="menu" aria-orientation="vertical" aria-labelledby="profileButton" tabindex="-1">
+            <!-- User email displayed as non-interactive text -->
+            <div id="profileEmail" class="px-4 py-2 text-sm text-gray-700 bg-gray-100 dark:text-gray-200 dark:bg-gray-800 select-none" role="none">
+              user@example.com
             </div>
+            <!-- Logout button triggers logout action -->
+            <button id="logoutButton" 
+                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-200 dark:text-gray-200 dark:hover:bg-gray-600 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    role="menuitem" tabindex="0" aria-label="Logout">
+              Logout
+            </button>
           </div>
         </div>
       </div>
@@ -337,6 +361,9 @@
     <main class="p-6 md:p-10 space-y-10">
       
       <!-- Cards -->
+      <div class="fade-in mb-6 text-2xl font-semibold text-blue-500 px-6">
+        Welcome Back User
+      </div>
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 transition-transform duration-300 ease-in-out">
           <div class="card p-6 fade-in">
             <div class="flex items-center gap-3">
@@ -404,7 +431,7 @@
         <h2 class="text-xl font-semibold mb-4">Quick Categories</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           <!-- Food Card -->
-          <div class="card p-4 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" onclick="addTransaction('food')">
+          <div class="card p-4 cursor-pointer transition-colors" onclick="addTransaction('food')">
             <div class="flex flex-col items-center">
               <div class="text-red-500 mb-2">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -418,7 +445,7 @@
           </div>
 
           <!-- Travel Card -->
-          <div class="card p-4 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" onclick="addTransaction('travel')">
+          <div class="card p-4 cursor-pointer transition-colors" onclick="addTransaction('travel')">
             <div class="flex flex-col items-center">
               <div class="text-blue-500 mb-2">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -433,7 +460,7 @@
           </div>
 
           <!-- Bills Card -->
-          <div class="card p-4 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" onclick="addTransaction('bills')">
+          <div class="card p-4 cursor-pointer transition-colors" onclick="addTransaction('bills')">
             <div class="flex flex-col items-center">
               <div class="text-yellow-500 mb-2">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -447,7 +474,7 @@
           </div>
 
           <!-- Shopping Card -->
-          <div class="card p-4 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" onclick="addTransaction('shopping')">
+          <div class="card p-4 cursor-pointer transition-colors" onclick="addTransaction('shopping')">
             <div class="flex flex-col items-center">
               <div class="text-purple-500 mb-2">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -461,7 +488,7 @@
           </div>
 
           <!-- Salary Card -->
-          <div class="card p-4 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors" onclick="addTransaction('salary')">
+          <div class="card p-4 cursor-pointer transition-colors" onclick="addTransaction('salary')">
             <div class="flex flex-col items-center">
               <div class="text-green-500 mb-2">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -497,6 +524,25 @@
         '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>';
     }
 
+    // Update profile dropdown background color based on theme
+    function updateProfileDropdownBg() {
+      const isDark = htmlElement.getAttribute("data-theme") === "dark";
+      const emailDiv = document.querySelector('#profileDropdown .text-sm');
+      const logoutButton = document.getElementById('logoutButton');
+      if (emailDiv && logoutButton) {
+        if (isDark) {
+          emailDiv.style.backgroundColor = '#1f2937'; // dark theme bg
+          emailDiv.style.color = '#e5e7eb'; // light text for dark bg
+          logoutButton.style.backgroundColor = '#1f2937';
+          logoutButton.style.color = '#e5e7eb'; // light text for dark bg
+        } else {
+          emailDiv.style.backgroundColor = '#f9fafb'; // light theme bg
+          emailDiv.style.color = '#1f2937'; // dark text for light bg
+          logoutButton.style.backgroundColor = '#f9fafb';
+          logoutButton.style.color = '#1f2937'; // dark text for light bg
+        }
+      }
+    }
 
     // Initialize theme from saved preference
     const savedTheme = localStorage.getItem('theme');
@@ -504,12 +550,14 @@
       htmlElement.setAttribute('data-theme', savedTheme);
     }
     updateThemeIcon();
+    updateProfileDropdownBg();
     themeToggle.addEventListener('click', () => {
       const currentTheme = htmlElement.getAttribute('data-theme') || 'light';
       const newTheme = currentTheme === 'light' ? 'dark' : 'light';
       htmlElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
       updateThemeIcon();
+      updateProfileDropdownBg();
     });
 
     // Load and display user name and avatar
@@ -520,9 +568,9 @@
         const email = userObj.user?.email ?? userObj.email ?? '';
         const avatarDiv = profileButton.querySelector('div');
         const nameSpan = profileButton.querySelector('span');
+        const emailDiv = document.getElementById('profileEmail');
         if (avatarDiv) avatarDiv.textContent = name.charAt(0).toUpperCase();
         if (nameSpan) nameSpan.textContent = name;
-        const emailDiv = document.querySelector('#profileDropdown .text-sm');
         if (emailDiv) emailDiv.textContent = email;
       }
     }
@@ -531,23 +579,62 @@
     profileButton.addEventListener('click', (e) => {
       e.stopPropagation();
       const isExpanded = profileButton.getAttribute('aria-expanded') === 'true';
-      profileDropdown.classList.toggle('hidden', isExpanded);
-      profileButton.setAttribute('aria-expanded', !isExpanded);
+      if (isExpanded) {
+        profileDropdown.classList.add('hidden');
+        profileButton.setAttribute('aria-expanded', 'false');
+        profileDropdown.setAttribute('tabindex', '-1');
+      } else {
+        profileDropdown.classList.remove('hidden');
+        profileButton.setAttribute('aria-expanded', 'true');
+        profileDropdown.setAttribute('tabindex', '0');
+        profileDropdown.focus();
+      }
     });
 
     // Close dropdown when clicking outside
     document.addEventListener('click', () => {
       profileDropdown.classList.add('hidden');
       profileButton.setAttribute('aria-expanded', 'false');
+      profileDropdown.setAttribute('tabindex', '-1');
     });
+
+    // Keyboard navigation support for profile dropdown
+    profileDropdown.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        profileDropdown.classList.add('hidden');
+        profileButton.setAttribute('aria-expanded', 'false');
+        profileButton.focus();
+      }
+    });
+
+    // Update profile dropdown background color based on theme
+    function updateProfileDropdownBg() {
+      const isDark = htmlElement.getAttribute("data-theme") === "dark";
+      const emailDiv = document.getElementById('profileEmail');
+      const logoutButton = document.getElementById('logoutButton');
+      if (emailDiv && logoutButton) {
+        if (isDark) {
+          emailDiv.style.backgroundColor = '#1f2937'; // dark theme bg
+          emailDiv.style.color = '#e5e7eb'; // light text for dark bg
+          logoutButton.style.backgroundColor = '#1f2937';
+          logoutButton.style.color = '#e5e7eb'; // light text for dark bg
+        } else {
+          emailDiv.style.backgroundColor = '#f9fafb'; // light theme bg
+          emailDiv.style.color = '#1f2937'; // dark text for light bg
+          logoutButton.style.backgroundColor = '#f9fafb';
+          logoutButton.style.color = '#1f2937'; // dark text for light bg
+        }
+      }
+    }
   </script>
   <script type="module" src="js/auth/logoutHandler.js"></script>
   <!-- WebSocket Connection Status -->  
-  <div id="connection-status" class="fixed bottom-4 right-4 z-50 px-3 py-1 rounded-full text-sm font-medium">Connecting...</div>
+  <div id="connection-status" style="display:none;"></div>
   
   <style>
     /* WebSocket Connection Status Styles */
     #connection-status {
+      display:none;
       background-color: #f59e0b; /* Amber for connecting */
       color: white;
       transition: all 0.3s ease;
@@ -641,7 +728,7 @@
         setTimeout(debugWebSocketConnection, 2000);
       } else {
         console.error('FinTrackState or webSocketService not available');
-        updateConnectionStatus('Error: Service not available');
+        // Removed updateConnectionStatus call to prevent displaying "Error: Service not available"
       }
     });
   </script>

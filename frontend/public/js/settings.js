@@ -303,7 +303,7 @@ function loadTheme() {
       });
     } else {
       htmlElement.removeAttribute('data-theme');
-      themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>';
+      themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 818.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>';
       themeRadios.forEach(radio => {
         radio.checked = radio.value === 'system';
       });
@@ -332,10 +332,25 @@ function loadTheme() {
   });
 }
 
+// Load notification preferences from localStorage and update toggles
+function loadNotificationPrefs() {
+  const notificationPrefs = JSON.parse(localStorage.getItem('notificationPrefs'));
+  if (notificationPrefs) {
+    const expenseAlertsCheckbox = document.getElementById('expenseAlerts');
+    const savingsRemindersCheckbox = document.getElementById('savingsReminders');
+    const summaryReportsCheckbox = document.getElementById('summaryReports');
+
+    if (expenseAlertsCheckbox) expenseAlertsCheckbox.checked = notificationPrefs.expenseAlerts;
+    if (savingsRemindersCheckbox) savingsRemindersCheckbox.checked = notificationPrefs.savingsReminders;
+    if (summaryReportsCheckbox) summaryReportsCheckbox.checked = notificationPrefs.summaryReports;
+  }
+}
+
 // Load categories and theme on page load
 document.addEventListener('DOMContentLoaded', () => {
   loadCategories();
   loadTheme();
+  loadNotificationPrefs();
 
   // Dropdown toggle for profile button
   const profileButton = document.getElementById('profileButton');
