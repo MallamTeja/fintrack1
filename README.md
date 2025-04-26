@@ -38,9 +38,9 @@ PORT=5000
 JWT_SECRET=your_jwt_secret
 ```
 
-4. Start the server:
+4. Start the application:
 ```bash
-node server.js
+node start-app.js
 ```
 
 5. Open your browser and navigate to `http://localhost:5000`
