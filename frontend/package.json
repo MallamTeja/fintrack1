@@ -4,8 +4,8 @@
   "description": "Frontend server for FinTrack - Personal Finance Manager",
   "main": "server.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "vercel dev",
+    "dev": "vercel dev"
   },
   "dependencies": {
     "express": "^4.18.2",
