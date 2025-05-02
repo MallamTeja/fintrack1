@@ -8,7 +8,9 @@
 // Import required modules
 import { store } from '../state/index.js';
 import { webSocketService } from '../services/webSocketService.js';
-import { apiService } from '../state/apiService.js';
+import { ApiService } from '../state/apiService.js';
+
+const apiService = new ApiService();
 
 class RealTimeTest {
   constructor() {

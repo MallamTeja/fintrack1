@@ -4,7 +4,7 @@
   "description": "Frontend server for FinTrack - Personal Finance Manager",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node index.js",
     "dev": "nodemon index.js"
   },
   "dependencies": {

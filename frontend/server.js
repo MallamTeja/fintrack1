@@ -1,14 +1,33 @@
+
 const express = require('express');
 const path = require('path');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const app = express();
 
+// Logging middleware to log all incoming requests
+app.use((req, res, next) => {
+    console.log(`[Frontend Server] ${req.method} ${req.url}`);
+    next();
+});
+
 // Proxy API requests to backend server
+app.use('/api', (req, res, next) => {
+    console.log(`[Proxy Middleware] Incoming request: ${req.method} ${req.url}`);
+    next();
+});
 app.use('/api', createProxyMiddleware({
     target: 'http://localhost:5000',
     changeOrigin: true,
-    pathRewrite: {
-        '^/api': '/api'
+    // Remove pathRewrite to forward /api requests as is
+    // pathRewrite: {
+    //     '^/api': '/api'
+    // },
+    onProxyReq: (proxyReq, req, res) => {
+        console.log(`[Proxy] Forwarding request to: ${proxyReq.protocol}//${proxyReq.host}${proxyReq.path}`);
+    },
+    onError: (err, req, res) => {
+        console.error(`[Proxy Error] ${err.message}`);
+        res.status(500).send('Proxy error');
     }
 }));
 
@@ -26,6 +45,10 @@ app.get('/login', (req, res) => {
 
 app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+
+app.get('/dashboard.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 app.get('/savings-goals.html', (req, res) => {
