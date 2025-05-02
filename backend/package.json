@@ -1,4 +1,3 @@
-
 {
   "name": "fintrack-backend",
   "version": "1.0.0",
@@ -9,6 +8,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "compression": "^1.8.0",
     "config": "^3.3.12",
     "cors": "^2.8.5",

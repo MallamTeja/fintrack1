@@ -6,8 +6,9 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 
+const dotenvPath = path.resolve(__dirname, '../.env');
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: dotenvPath });
 
 console.log('Environment variables loaded. MONGODB_URI:', process.env.MONGODB_URI);
 
